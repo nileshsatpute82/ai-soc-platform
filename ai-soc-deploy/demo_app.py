@@ -9,6 +9,7 @@ from mock_mode import (
 )
 from core_platform import CorePlatformService
 from aws_integration import create_aws_integrated_services
+from real_alert_processor import RealAlertProcessor
 
 def create_demo_app():
     """Create Flask application with AWS integration."""
@@ -26,6 +27,9 @@ def create_demo_app():
     
     # Core Platform Service
     core_platform = CorePlatformService(aws_clients['bedrock'], mitre_component, audit_service)
+    
+    # Real Alert Processor
+    real_alerts = RealAlertProcessor(config_service)
     
     @app.route('/')
     def home():
@@ -67,6 +71,7 @@ def create_demo_app():
             "mode": integration_status["mode"],
             "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             "aws_integration": integration_status,
+            "real_alerts": real_alerts.health_check(),
             "components": {
                 "bedrock": aws_clients['bedrock'].health_check(),
                 "rds": aws_clients['rds'].health_check(),
