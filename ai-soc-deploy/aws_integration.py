@@ -10,6 +10,10 @@ from mock_mode import (
     MockElastiCacheClient, MockSQSClient, MockConfigurationService,
     MockAuditService, MockMITREComponent
 )
+from real_aws_clients import (
+    RealBedrockClient, RealRDSClient, RealDocumentDBClient,
+    RealElastiCacheClient, RealSQSClient
+)
 
 class AWSIntegrationManager:
     """Manages switching between mock and real AWS services."""
@@ -51,8 +55,7 @@ class AWSIntegrationManager:
         """Get Bedrock client (real or mock)."""
         if self.use_real_aws:
             try:
-                from aws_clients.bedrock_client import BedrockClient
-                return BedrockClient(config_service)
+                return RealBedrockClient(config_service)
             except Exception as e:
                 print(f"Failed to create real Bedrock client: {e} - falling back to mock")
                 return MockBedrockClient(config_service)
@@ -63,8 +66,7 @@ class AWSIntegrationManager:
         """Get RDS client (real or mock)."""
         if self.use_real_aws and self._has_rds_config():
             try:
-                from aws_clients.rds_client import RDSClient
-                return RDSClient(config_service)
+                return RealRDSClient(config_service)
             except Exception as e:
                 print(f"Failed to create real RDS client: {e} - falling back to mock")
                 return MockRDSClient(config_service)
@@ -75,8 +77,7 @@ class AWSIntegrationManager:
         """Get DocumentDB client (real or mock)."""
         if self.use_real_aws and self._has_documentdb_config():
             try:
-                from aws_clients.documentdb_client import DocumentDBClient
-                return DocumentDBClient(config_service)
+                return RealDocumentDBClient(config_service)
             except Exception as e:
                 print(f"Failed to create real DocumentDB client: {e} - falling back to mock")
                 return MockDocumentDBClient(config_service)
@@ -87,8 +88,7 @@ class AWSIntegrationManager:
         """Get ElastiCache client (real or mock)."""
         if self.use_real_aws and self._has_redis_config():
             try:
-                from aws_clients.elasticache_client import ElastiCacheClient
-                return ElastiCacheClient(config_service)
+                return RealElastiCacheClient(config_service)
             except Exception as e:
                 print(f"Failed to create real ElastiCache client: {e} - falling back to mock")
                 return MockElastiCacheClient(config_service)
@@ -99,8 +99,7 @@ class AWSIntegrationManager:
         """Get SQS client (real or mock)."""
         if self.use_real_aws:
             try:
-                from aws_clients.sqs_client import SQSClient
-                return SQSClient(config_service)
+                return RealSQSClient(config_service)
             except Exception as e:
                 print(f"Failed to create real SQS client: {e} - falling back to mock")
                 return MockSQSClient(config_service)
