@@ -7,6 +7,7 @@ from mock_mode import (
     MockElastiCacheClient, MockSQSClient, MockConfigurationService,
     MockAuditService, MockMITREComponent
 )
+from core_platform import CorePlatformService
 
 def create_demo_app():
     """Create demo Flask application with mock services."""
@@ -26,6 +27,9 @@ def create_demo_app():
     
     # Mock components
     mitre_component = MockMITREComponent(None, config_service)
+    
+    # Core Platform Service
+    core_platform = CorePlatformService(bedrock_client, mitre_component, audit_service)
     
     @app.route('/')
     def home():
@@ -124,9 +128,65 @@ def create_demo_app():
             "message": "Demo operations completed successfully!"
         })
     
+    @app.route('/api/alerts/process', methods=['POST'])
+    def process_alert():
+        """Process security alert through AI pipeline."""
+        try:
+            from flask import request
+            alert_data = request.get_json() or {}
+            
+            # Use default demo alert if no data provided
+            if not alert_data:
+                alert_data = {
+                    "alert_id": f"web_alert_{int(time.time())}",
+                    "source": "Web_Interface",
+                    "alert_type": "suspicious_activity",
+                    "severity": "medium",
+                    "description": "Suspicious activity detected via web interface",
+                    "indicators": ["web_anomaly", "user_behavior"]
+                }
+            
+            result = core_platform.process_security_alert(alert_data)
+            return jsonify({"status": "success", "result": result})
+            
+        except Exception as e:
+            return jsonify({"status": "error", "error": str(e)}), 500
+    
+    @app.route('/api/alerts/queue')
+    def get_alert_queue():
+        """Get current alert queue."""
+        try:
+            queue = core_platform.get_alert_queue()
+            return jsonify({"status": "success", "alerts": queue, "count": len(queue)})
+        except Exception as e:
+            return jsonify({"status": "error", "error": str(e)}), 500
+    
+    @app.route('/api/crews/status')
+    def get_crew_status():
+        """Get AI crew status."""
+        try:
+            status = core_platform.get_crew_status()
+            return jsonify({"status": "success", "crews": status})
+        except Exception as e:
+            return jsonify({"status": "error", "error": str(e)}), 500
+    
+    @app.route('/api/security/demo-alerts', methods=['POST'])
+    def generate_demo_alerts():
+        """Generate and process demo security alerts."""
+        try:
+            results = core_platform.generate_demo_alerts()
+            return jsonify({
+                "status": "success", 
+                "message": f"Processed {len(results)} demo alerts",
+                "alerts": results
+            })
+        except Exception as e:
+            return jsonify({"status": "error", "error": str(e)}), 500
+    
     return app
 
 if __name__ == '__main__':
+    import time
     app = create_demo_app()
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
