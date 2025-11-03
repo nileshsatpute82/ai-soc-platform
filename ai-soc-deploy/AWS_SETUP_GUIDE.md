@@ -32,7 +32,7 @@
    - Navigate to "Model access"
 
 2. **Request Model Access**
-   - Find "Anthropic Claude 3.5 Sonnet"
+   - Find "Anthropic Claude 4.5 Sonnet" (model ID: anthropic.claude-sonnet-4-5-20250929-v1:0)
    - Click "Request model access"
    - Fill out use case: "AI Security Operations Platform"
    - Submit request (usually approved instantly)
@@ -106,7 +106,7 @@ Visit `/health/` endpoint to see:
 ## 💰 **COST ESTIMATION**
 
 ### **AWS Bedrock Costs:**
-- **Claude 3.5 Sonnet**: ~$0.003 per 1K input tokens
+- **Claude 4.5 Sonnet**: ~$0.003 per 1K input tokens
 - **Typical security alert analysis**: ~$0.01-0.02 per alert
 - **Demo usage**: <$1/month
 
@@ -136,7 +136,7 @@ Don't add any AWS credentials
 ## ✅ **VERIFICATION CHECKLIST**
 
 - [ ] AWS IAM user created with proper permissions
-- [ ] Bedrock Claude 3.5 Sonnet access approved
+- [ ] Bedrock Claude 4.5 Sonnet access approved (model ID: anthropic.claude-sonnet-4-5-20250929-v1:0)
 - [ ] Environment variables set in Render.com
 - [ ] Code deployed successfully
 - [ ] Health check shows "real_aws" mode
