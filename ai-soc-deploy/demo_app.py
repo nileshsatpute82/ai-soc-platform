@@ -34,6 +34,11 @@ def create_demo_app():
     @app.route('/')
     def home():
         """Security Operations Dashboard."""
+        return render_template('prisma-dashboard.html')
+    
+    @app.route('/old-dashboard')
+    def old_dashboard():
+        """Original dark theme dashboard."""
         return render_template('dashboard.html')
     
     @app.route('/api/')

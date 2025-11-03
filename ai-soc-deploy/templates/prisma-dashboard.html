@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Security Operations Center</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/prisma-theme.css') }}">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">
+                🛡️ AI Security Operations
+            </div>
+            <div class="search-bar">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" placeholder="Search alerts, incidents, or threats...">
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="header-btn notification-badge">🔔</button>
+            <button class="header-btn">⚙️</button>
+            <button class="header-btn">👤</button>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-section">
+            <div class="sidebar-title">Security Operations</div>
+            <ul class="sidebar-menu">
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link active">
+                        <span class="sidebar-icon">📊</span>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link">
+                        <span class="sidebar-icon">🚨</span>
+                        Security Alerts
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link">
+                        <span class="sidebar-icon">🔍</span>
+                        Investigations
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link">
+                        <span class="sidebar-icon">🎯</span>
+                        Threat Intelligence
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-title">AI Crews</div>
+            <ul class="sidebar-menu">
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link">
+                        <span class="sidebar-icon">🤖</span>
+                        Triage Crew
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link">
+                        <span class="sidebar-icon">🔬</span>
+                        Investigation Crew
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link">
+                        <span class="sidebar-icon">🌐</span>
+                        Network Security
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link">
+                        <span class="sidebar-icon">💻</span>
+                        Endpoint Security
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-title">Management</div>
+            <ul class="sidebar-menu">
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link">
+                        <span class="sidebar-icon">⚙️</span>
+                        Configuration
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link">
+                        <span class="sidebar-icon">📋</span>
+                        Audit Logs
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="#" class="sidebar-link">
+                        <span class="sidebar-icon">💊</span>
+                        System Health
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="page-header">
+            <h1 class="page-title">Security Operations Dashboard</h1>
+            <p class="page-subtitle">Real-time AI-powered threat detection and response</p>
+        </div>
+
+        <!-- Metrics Grid -->
+        <div class="dashboard-grid">
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-title">
+                        🚨 Active Alerts
+                    </div>
+                    <span class="metric-status status-warning">MONITORING</span>
+                </div>
+                <div class="metric-value" id="active-alerts">0</div>
+                <div class="metric-label">Security alerts requiring attention</div>
+                <div class="metric-change change-positive">
+                    ↗️ +12% from last hour
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-title">
+                        🤖 AI Crews
+                    </div>
+                    <span class="metric-status status-active">ACTIVE</span>
+                </div>
+                <div class="metric-value">4/4</div>
+                <div class="metric-label">AI security crews operational</div>
+                <div class="metric-change change-positive">
+                    ✅ All systems operational
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-title">
+                        ⚡ Response Time
+                    </div>
+                    <span class="metric-status status-active">OPTIMAL</span>
+                </div>
+                <div class="metric-value">0.8s</div>
+                <div class="metric-label">Average AI analysis time</div>
+                <div class="metric-change change-positive">
+                    ↗️ 15% faster than target
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-title">
+                        🎯 Accuracy
+                    </div>
+                    <span class="metric-status status-active">EXCELLENT</span>
+                </div>
+                <div class="metric-value">94.2%</div>
+                <div class="metric-label">AI threat detection accuracy</div>
+                <div class="metric-change change-positive">
+                    ↗️ +2.1% this week
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Alert Processing -->
+        <div class="data-table">
+            <div class="table-header">
+                <div class="table-title">🚨 Security Alert Processing</div>
+                <div class="table-actions">
+                    <button class="btn btn-sm" id="process-alert-btn">
+                        ⚡ Process Alert
+                    </button>
+                    <button class="btn btn-secondary btn-sm" id="generate-demo-btn">
+                        🎯 Generate Demo
+                    </button>
+                </div>
+            </div>
+            <div class="table-content" id="alert-processing-results">
+                <div class="table-row">
+                    <div class="row-main">
+                        <div class="row-title">Ready for Security Operations</div>
+                        <div class="row-subtitle">Click "Process Alert" to analyze threats with AI or "Generate Demo" for realistic scenarios</div>
+                    </div>
+                    <div class="row-meta">
+                        <span class="risk-badge risk-low">READY</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Queue -->
+        <div class="data-table" style="margin-top: 24px;">
+            <div class="table-header">
+                <div class="table-title">📋 Security Alert Queue</div>
+                <div class="table-actions">
+                    <button class="btn btn-outline btn-sm" id="refresh-queue-btn">
+                        🔄 Refresh
+                    </button>
+                </div>
+            </div>
+            <div class="table-content" id="alert-queue-content">
+                <div class="table-row">
+                    <div class="row-main">
+                        <div class="row-title">No alerts in queue</div>
+                        <div class="row-subtitle">Generate demo alerts to see AI processing in action</div>
+                    </div>
+                    <div class="row-meta">
+                        <span class="risk-badge risk-low">CLEAR</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Crew Status -->
+        <div class="data-table" style="margin-top: 24px;">
+            <div class="table-header">
+                <div class="table-title">🤖 AI Security Crews Status</div>
+                <div class="table-actions">
+                    <button class="btn btn-outline btn-sm" id="refresh-crews-btn">
+                        🔄 Refresh Status
+                    </button>
+                </div>
+            </div>
+            <div class="table-content" id="crew-status-content">
+                <div class="table-row">
+                    <div class="row-main">
+                        <div class="row-title">Loading AI crew status...</div>
+                        <div class="row-subtitle">Checking operational status of all security crews</div>
+                    </div>
+                    <div class="row-meta">
+                        <span class="loading-spinner"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Health -->
+        <div class="data-table" style="margin-top: 24px;">
+            <div class="table-header">
+                <div class="table-title">💊 System Health Monitor</div>
+                <div class="table-actions">
+                    <button class="btn btn-outline btn-sm" id="health-check-btn">
+                        🔍 Check Health
+                    </button>
+                </div>
+            </div>
+            <div class="table-content" id="system-health-content">
+                <div class="table-row">
+                    <div class="row-main">
+                        <div class="row-title">Loading system health...</div>
+                        <div class="row-subtitle">Checking all infrastructure components</div>
+                    </div>
+                    <div class="row-meta">
+                        <span class="loading-spinner"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/prisma-dashboard.js') }}"></script>
+</body>
+</html>
