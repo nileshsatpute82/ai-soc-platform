@@ -29,10 +29,7 @@ def create_demo_app():
     core_platform = CorePlatformService(aws_clients['bedrock'], mitre_component, audit_service)
     
     # Real Alert Processor with database clients
-    from real_database_clients import RealRDSClient, RealDocumentDBClient
-    rds_client = aws_clients['rds'] if hasattr(aws_clients['rds'], 'connection') else None
-    docdb_client = aws_clients['documentdb'] if hasattr(aws_clients['documentdb'], 'client') else None
-    real_alerts = RealAlertProcessor(config_service, rds_client, docdb_client)
+    real_alerts = RealAlertProcessor(config_service, aws_clients['rds'], aws_clients['documentdb'])
     
     @app.route('/')
     def home():
@@ -291,6 +288,20 @@ def create_demo_app():
                 'alerts': all_alerts, 
                 'real_alerts_count': len(real_aws_alerts),
                 'total_count': len(all_alerts)
+            })
+        except Exception as e:
+            return jsonify({"status": "error", "error": str(e)}), 500
+    
+    @app.route('/api/alerts/stored')
+    def get_stored_alerts():
+        """Get alerts stored in PostgreSQL database."""
+        try:
+            stored_alerts = real_alerts.get_stored_alerts(limit=50)
+            return jsonify({
+                'status': 'success',
+                'alerts': stored_alerts,
+                'count': len(stored_alerts),
+                'source': 'postgresql_database'
             })
         except Exception as e:
             return jsonify({"status": "error", "error": str(e)}), 500
