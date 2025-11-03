@@ -194,6 +194,43 @@ def create_demo_app():
         except Exception as e:
             return jsonify({"status": "error", "error": str(e)}), 500
     
+    @app.route('/api/alerts/')
+    def get_real_alerts():
+        """Get real security alerts from AWS SQS."""
+        try:
+            # Get real alerts from SQS
+            real_aws_alerts = real_alerts.poll_alerts(max_messages=10)
+            
+            # Mock alerts for demo
+            mock_alerts = [
+                {
+                    'alert_id': 'demo-001',
+                    'timestamp': '2024-01-15T10:30:00Z',
+                    'severity': 'HIGH',
+                    'source': 'Demo Mode',
+                    'description': 'Demo: Suspicious login from unusual location',
+                    'event_type': 'Demo Alert'
+                },
+                {
+                    'alert_id': 'demo-002', 
+                    'timestamp': '2024-01-15T09:15:00Z',
+                    'severity': 'MEDIUM',
+                    'source': 'Demo Mode',
+                    'description': 'Demo: Unusual network traffic detected',
+                    'event_type': 'Demo Alert'
+                }
+            ]
+            
+            # Combine real and mock alerts
+            all_alerts = real_aws_alerts + mock_alerts
+            return jsonify({
+                'alerts': all_alerts, 
+                'real_alerts_count': len(real_aws_alerts),
+                'total_count': len(all_alerts)
+            })
+        except Exception as e:
+            return jsonify({"status": "error", "error": str(e)}), 500
+    
     return app
 
 if __name__ == '__main__':

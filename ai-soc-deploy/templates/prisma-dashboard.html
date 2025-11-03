@@ -204,24 +204,24 @@
             </div>
         </div>
 
-        <!-- Alert Queue -->
+        <!-- Real-Time Alerts -->
         <div class="data-table" style="margin-top: 24px;">
             <div class="table-header">
-                <div class="table-title">📋 Security Alert Queue</div>
+                <div class="table-title">🚨 Real-Time Security Alerts</div>
                 <div class="table-actions">
-                    <button class="btn btn-outline btn-sm" id="refresh-queue-btn">
-                        🔄 Refresh
+                    <button class="btn btn-outline btn-sm" id="refresh-alerts-btn">
+                        🔄 Refresh Alerts
                     </button>
                 </div>
             </div>
-            <div class="table-content" id="alert-queue-content">
+            <div class="table-content" id="real-alerts-content">
                 <div class="table-row">
                     <div class="row-main">
-                        <div class="row-title">No alerts in queue</div>
-                        <div class="row-subtitle">Generate demo alerts to see AI processing in action</div>
+                        <div class="row-title">Loading real-time alerts...</div>
+                        <div class="row-subtitle">Fetching alerts from AWS SQS and demo sources</div>
                     </div>
                     <div class="row-meta">
-                        <span class="risk-badge risk-low">CLEAR</span>
+                        <span class="loading-spinner"></span>
                     </div>
                 </div>
             </div>
@@ -274,6 +274,125 @@
         </div>
     </main>
 
+    <script>
+        // Real-time alerts functionality
+        function refreshRealAlerts() {
+            const container = document.getElementById('real-alerts-content');
+            container.innerHTML = `
+                <div class="table-row">
+                    <div class="row-main">
+                        <div class="row-title">Loading alerts...</div>
+                        <div class="row-subtitle">Fetching real-time security alerts</div>
+                    </div>
+                    <div class="row-meta">
+                        <span class="loading-spinner"></span>
+                    </div>
+                </div>
+            `;
+            
+            fetch('/api/alerts/')
+            .then(response => response.json())
+            .then(data => {
+                displayRealAlerts(data.alerts, data.real_alerts_count, data.total_count);
+                // Update active alerts counter
+                document.getElementById('active-alerts').textContent = data.total_count;
+            })
+            .catch(error => {
+                container.innerHTML = `
+                    <div class="table-row">
+                        <div class="row-main">
+                            <div class="row-title">Error loading alerts</div>
+                            <div class="row-subtitle">${error.message}</div>
+                        </div>
+                        <div class="row-meta">
+                            <span class="risk-badge risk-high">ERROR</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
+        function displayRealAlerts(alerts, realCount, totalCount) {
+            const container = document.getElementById('real-alerts-content');
+            
+            if (!alerts || alerts.length === 0) {
+                container.innerHTML = `
+                    <div class="table-row">
+                        <div class="row-main">
+                            <div class="row-title">No alerts found</div>
+                            <div class="row-subtitle">Create IAM user in AWS Console to generate real alerts</div>
+                        </div>
+                        <div class="row-meta">
+                            <span class="risk-badge risk-low">CLEAR</span>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = `
+                <div class="table-row" style="background: #f8f9fa; border-bottom: 2px solid #e9ecef;">
+                    <div class="row-main">
+                        <div class="row-title">📊 Alert Summary</div>
+                        <div class="row-subtitle">Total: ${totalCount} alerts • Real AWS: ${realCount} • Demo: ${totalCount - realCount}</div>
+                    </div>
+                    <div class="row-meta">
+                        <span class="risk-badge ${realCount > 0 ? 'risk-warning' : 'risk-low'}">${realCount > 0 ? 'ACTIVE' : 'DEMO'}</span>
+                    </div>
+                </div>
+            `;
+            
+            alerts.forEach(alert => {
+                const isReal = !alert.source.includes('Demo');
+                const severityClass = alert.severity.toLowerCase();
+                const timeAgo = getTimeAgo(alert.timestamp);
+                
+                html += `
+                    <div class="table-row">
+                        <div class="row-main">
+                            <div class="row-title">
+                                ${isReal ? '🔴' : '🟡'} ${alert.description}
+                                <span style="font-size: 0.8em; color: #6c757d; margin-left: 8px;">[${alert.alert_id}]</span>
+                            </div>
+                            <div class="row-subtitle">
+                                Source: ${alert.source} • Type: ${alert.event_type} • ${timeAgo}
+                            </div>
+                        </div>
+                        <div class="row-meta">
+                            <span class="risk-badge ${isReal ? 'risk-warning' : 'risk-info'}">${isReal ? 'REAL AWS' : 'DEMO'}</span>
+                            <span class="risk-badge risk-${severityClass}">${alert.severity}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function getTimeAgo(timestamp) {
+            const now = new Date();
+            const alertTime = new Date(timestamp);
+            const diffMs = now - alertTime;
+            const diffMins = Math.floor(diffMs / 60000);
+            
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffMins < 1440) return `${Math.floor(diffMins / 60)}h ago`;
+            return `${Math.floor(diffMins / 1440)}d ago`;
+        }
+        
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load alerts on page load
+            refreshRealAlerts();
+            
+            // Auto-refresh every 30 seconds
+            setInterval(refreshRealAlerts, 30000);
+            
+            // Refresh button
+            document.getElementById('refresh-alerts-btn').addEventListener('click', refreshRealAlerts);
+        });
+    </script>
     <script src="{{ url_for('static', filename='js/prisma-dashboard.js') }}"></script>
 </body>
 </html>
