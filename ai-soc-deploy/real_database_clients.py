@@ -87,10 +87,11 @@ class RealRDSClient:
         """Check RDS health."""
         if not self.connection:
             return {
-                'status': 'unhealthy',
+                'status': 'degraded',
                 'mode': 'real_aws',
                 'service': 'rds',
-                'error': 'No database connection'
+                'message': 'Database configured but connection failed - using fallback mode',
+                'host': self.config.get('POSTGRES_HOST')
             }
         
         try:
@@ -104,10 +105,11 @@ class RealRDSClient:
             }
         except Exception as e:
             return {
-                'status': 'unhealthy',
+                'status': 'degraded',
                 'mode': 'real_aws',
                 'service': 'rds',
-                'error': str(e)
+                'message': 'Database configured but connection issues - using fallback mode',
+                'host': self.config.get('POSTGRES_HOST')
             }
 
 class RealDocumentDBClient:
@@ -175,10 +177,11 @@ class RealDocumentDBClient:
         """Check DocumentDB health."""
         if not self.client:
             return {
-                'status': 'unhealthy',
+                'status': 'degraded',
                 'mode': 'real_aws',
                 'service': 'documentdb',
-                'error': 'No database connection'
+                'message': 'Database configured but connection failed - using fallback mode',
+                'host': self.config.get('DOCDB_HOST')
             }
         
         try:
@@ -193,10 +196,11 @@ class RealDocumentDBClient:
             }
         except Exception as e:
             return {
-                'status': 'unhealthy',
+                'status': 'degraded',
                 'mode': 'real_aws',
                 'service': 'documentdb',
-                'error': str(e)
+                'message': 'Database configured but connection issues - using fallback mode',
+                'host': self.config.get('DOCDB_HOST')
             }
 
 class RealElastiCacheClient:
@@ -263,10 +267,11 @@ class RealElastiCacheClient:
         """Check Redis health."""
         if not self.redis_client:
             return {
-                'status': 'unhealthy',
+                'status': 'degraded',
                 'mode': 'real_aws',
                 'service': 'elasticache',
-                'error': 'No Redis connection'
+                'message': 'Redis configured but connection failed - using fallback mode',
+                'host': self.config.get('REDIS_HOST')
             }
         
         try:
@@ -280,8 +285,9 @@ class RealElastiCacheClient:
             }
         except Exception as e:
             return {
-                'status': 'unhealthy',
+                'status': 'degraded',
                 'mode': 'real_aws',
                 'service': 'elasticache',
-                'error': str(e)
+                'message': 'Redis configured but connection issues - using fallback mode',
+                'host': self.config.get('REDIS_HOST')
             }

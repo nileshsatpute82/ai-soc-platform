@@ -88,6 +88,49 @@ def create_demo_app():
         }
         return jsonify(health_status)
     
+    @app.route('/debug/rds')
+    def debug_rds():
+        """Debug RDS connection details."""
+        try:
+            debug_info = {
+                'environment_variables': {
+                    'POSTGRES_HOST': os.environ.get('POSTGRES_HOST', 'NOT_SET'),
+                    'POSTGRES_USER': os.environ.get('POSTGRES_USER', 'NOT_SET'),
+                    'POSTGRES_DB': os.environ.get('POSTGRES_DB', 'NOT_SET'),
+                    'POSTGRES_PORT': os.environ.get('POSTGRES_PORT', 'NOT_SET'),
+                    'ENABLE_REAL_DATABASES': os.environ.get('ENABLE_REAL_DATABASES', 'NOT_SET')
+                },
+                'config_service_values': {
+                    'POSTGRES_HOST': config_service.get('POSTGRES_HOST'),
+                    'POSTGRES_USER': config_service.get('POSTGRES_USER'),
+                    'POSTGRES_DB': config_service.get('POSTGRES_DB'),
+                    'POSTGRES_PORT': config_service.get('POSTGRES_PORT'),
+                    'ENABLE_REAL_DATABASES': config_service.get('ENABLE_REAL_DATABASES')
+                },
+                'rds_client_type': type(aws_clients['rds']).__name__,
+                'connection_test': None
+            }
+            
+            # Test basic connection
+            try:
+                if hasattr(aws_clients['rds'], 'connection'):
+                    if aws_clients['rds'].connection:
+                        debug_info['connection_test'] = 'Connection object exists'
+                    else:
+                        debug_info['connection_test'] = 'Connection object is None'
+                else:
+                    debug_info['connection_test'] = 'No connection attribute'
+            except Exception as e:
+                debug_info['connection_test'] = f'Error testing connection: {str(e)}'
+            
+            return jsonify(debug_info)
+            
+        except Exception as e:
+            return jsonify({
+                'error': str(e),
+                'timestamp': time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+            }), 500
+    
     @app.route('/api/config/')
     def get_config():
         """Get configuration."""
