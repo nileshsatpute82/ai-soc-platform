@@ -13,9 +13,18 @@ from mock_mode import (
 from real_aws_clients import (
     RealBedrockClient, RealSQSClient
 )
-from real_database_clients import (
-    RealRDSClient, RealDocumentDBClient, RealElastiCacheClient
-)
+# Conditional import for database clients
+try:
+    from real_database_clients import (
+        RealRDSClient, RealDocumentDBClient, RealElastiCacheClient
+    )
+    DATABASE_CLIENTS_AVAILABLE = True
+except ImportError as e:
+    print(f"Database clients not available: {e}")
+    DATABASE_CLIENTS_AVAILABLE = False
+    RealRDSClient = None
+    RealDocumentDBClient = None
+    RealElastiCacheClient = None
 
 class AWSIntegrationManager:
     """Manages switching between mock and real AWS services."""
@@ -67,7 +76,8 @@ class AWSIntegrationManager:
     def get_rds_client(self, config_service):
         """Get RDS client (real or mock)."""
         enable_real_dbs = config_service.get('ENABLE_REAL_DATABASES', 'false').lower() == 'true'
-        if self.use_real_aws and enable_real_dbs and self._has_rds_config():
+        if (DATABASE_CLIENTS_AVAILABLE and self.use_real_aws and 
+            enable_real_dbs and self._has_rds_config()):
             try:
                 return RealRDSClient(config_service)
             except Exception as e:
@@ -79,7 +89,8 @@ class AWSIntegrationManager:
     def get_documentdb_client(self, config_service):
         """Get DocumentDB client (real or mock)."""
         enable_real_dbs = config_service.get('ENABLE_REAL_DATABASES', 'false').lower() == 'true'
-        if self.use_real_aws and enable_real_dbs and self._has_documentdb_config():
+        if (DATABASE_CLIENTS_AVAILABLE and self.use_real_aws and 
+            enable_real_dbs and self._has_documentdb_config()):
             try:
                 return RealDocumentDBClient(config_service)
             except Exception as e:
@@ -91,7 +102,8 @@ class AWSIntegrationManager:
     def get_elasticache_client(self, config_service):
         """Get ElastiCache client (real or mock)."""
         enable_real_dbs = config_service.get('ENABLE_REAL_DATABASES', 'false').lower() == 'true'
-        if self.use_real_aws and enable_real_dbs and self._has_redis_config():
+        if (DATABASE_CLIENTS_AVAILABLE and self.use_real_aws and 
+            enable_real_dbs and self._has_redis_config()):
             try:
                 return RealElastiCacheClient(config_service)
             except Exception as e:

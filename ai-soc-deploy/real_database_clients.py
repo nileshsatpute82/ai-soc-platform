@@ -1,10 +1,29 @@
 """Real AWS database client implementations."""
 
-import psycopg2
-import pymongo
-import redis
 import json
 from typing import Dict, Any, List, Optional
+
+# Conditional imports with fallbacks for compatibility
+try:
+    import psycopg2
+    PSYCOPG2_AVAILABLE = True
+except ImportError:
+    PSYCOPG2_AVAILABLE = False
+    psycopg2 = None
+
+try:
+    import pymongo
+    PYMONGO_AVAILABLE = True
+except ImportError:
+    PYMONGO_AVAILABLE = False
+    pymongo = None
+
+try:
+    import redis
+    REDIS_AVAILABLE = True
+except ImportError:
+    REDIS_AVAILABLE = False
+    redis = None
 
 class RealRDSClient:
     """Real AWS RDS PostgreSQL client."""
@@ -16,6 +35,11 @@ class RealRDSClient:
     
     def connect(self):
         """Connect to PostgreSQL RDS."""
+        if not PSYCOPG2_AVAILABLE:
+            print("psycopg2 not available - using mock mode")
+            self.connection = None
+            return
+            
         try:
             self.connection = psycopg2.connect(
                 host=self.config.get('POSTGRES_HOST'),
@@ -97,6 +121,12 @@ class RealDocumentDBClient:
     
     def connect(self):
         """Connect to DocumentDB."""
+        if not PYMONGO_AVAILABLE:
+            print("pymongo not available - using mock mode")
+            self.client = None
+            self.database = None
+            return
+            
         try:
             connection_string = f"mongodb://{self.config.get('DOCDB_USER')}:{self.config.get('DOCDB_PASSWORD')}@{self.config.get('DOCDB_HOST')}:{self.config.get('DOCDB_PORT', 27017)}/{self.config.get('DOCDB_DATABASE')}?ssl=true&replicaSet=rs0&readPreference=secondaryPreferred&retryWrites=false"
             
@@ -179,6 +209,11 @@ class RealElastiCacheClient:
     
     def connect(self):
         """Connect to Redis."""
+        if not REDIS_AVAILABLE:
+            print("redis not available - using mock mode")
+            self.redis_client = None
+            return
+            
         try:
             self.redis_client = redis.Redis(
                 host=self.config.get('REDIS_HOST'),
