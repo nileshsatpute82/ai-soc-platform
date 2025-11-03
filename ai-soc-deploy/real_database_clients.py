@@ -96,19 +96,29 @@ class RealRDSClient:
         
         try:
             result = self.execute_query("SELECT 1")
-            return {
-                'status': 'healthy',
-                'mode': 'real_aws',
-                'service': 'rds',
-                'connection': 'active',
-                'host': self.config.get('POSTGRES_HOST')
-            }
+            if result and len(result) > 0:
+                return {
+                    'status': 'healthy',
+                    'mode': 'real_aws',
+                    'service': 'rds',
+                    'connection': 'active',
+                    'host': self.config.get('POSTGRES_HOST'),
+                    'test_query': 'successful'
+                }
+            else:
+                return {
+                    'status': 'degraded',
+                    'mode': 'real_aws',
+                    'service': 'rds',
+                    'message': 'Database connected but query failed',
+                    'host': self.config.get('POSTGRES_HOST')
+                }
         except Exception as e:
             return {
                 'status': 'degraded',
                 'mode': 'real_aws',
                 'service': 'rds',
-                'message': 'Database configured but connection issues - using fallback mode',
+                'message': f'Database connection error: {str(e)}',
                 'host': self.config.get('POSTGRES_HOST')
             }
 
