@@ -218,7 +218,7 @@ class RealAlertProcessor:
             health_data['sqs_access'] = 'healthy'
             
             # Test storage if available
-            if self.storage:
+            if self.storage is not None:
                 storage_health = self.storage.health_check()
                 health_data['storage'] = storage_health
             
