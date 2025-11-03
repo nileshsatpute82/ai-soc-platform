@@ -5,14 +5,20 @@ import json
 import time
 from typing import Dict, Any, List
 from datetime import datetime
+from alert_storage import AlertStorage
 
 class RealAlertProcessor:
     """Process real security alerts from AWS SQS."""
     
-    def __init__(self, config_service):
+    def __init__(self, config_service, rds_client=None, documentdb_client=None):
         self.config = config_service
         self.sqs = boto3.client('sqs', region_name=self.config.get('AWS_REGION', 'us-east-1'))
         self.queue_url = self.config.get('AWS_SQS_QUEUE_URL')
+        
+        # Initialize alert storage if database clients provided
+        self.storage = None
+        if rds_client and documentdb_client:
+            self.storage = AlertStorage(rds_client, documentdb_client)
     
     def poll_alerts(self, max_messages: int = 10) -> List[Dict[str, Any]]:
         """Poll SQS for new security alerts."""
@@ -44,6 +50,12 @@ class RealAlertProcessor:
                     # Convert to standard alert format
                     alert = self.convert_to_standard_alert(alert_data, message)
                     alerts.append(alert)
+                    
+                    # Save alert to persistent storage
+                    if self.storage:
+                        alert_id = self.storage.save_alert(alert)
+                        if alert_id:
+                            alert['stored_id'] = alert_id
                     
                     # Delete processed message
                     self.sqs.delete_message(
@@ -170,33 +182,58 @@ class RealAlertProcessor:
         
         return recommendations
     
+    def get_stored_alerts(self, limit: int = 50) -> List[Dict[str, Any]]:
+        """Get alerts from persistent storage."""
+        if self.storage:
+            return self.storage.get_alerts(limit=limit)
+        return []
+    
+    def get_alert_statistics(self) -> Dict[str, Any]:
+        """Get alert statistics from storage."""
+        if self.storage:
+            return self.storage.get_alert_statistics()
+        return {'total_alerts': 0, 'by_severity': {}, 'by_status': {}, 'recent_24h': 0}
+    
     def health_check(self) -> Dict[str, Any]:
         """Check real alert processor health."""
         try:
+            health_data = {
+                'service': 'real_alert_processor',
+                'queue_configured': bool(self.queue_url),
+                'storage_enabled': bool(self.storage)
+            }
+            
             if not self.queue_url:
-                return {
+                health_data.update({
                     'status': 'degraded',
-                    'service': 'real_alert_processor',
-                    'queue_configured': False,
                     'message': 'AWS_SQS_QUEUE_URL not configured'
-                }
+                })
+                return health_data
             
             # Test SQS access
             self.sqs.get_queue_attributes(
                 QueueUrl=self.queue_url,
                 AttributeNames=['ApproximateNumberOfMessages']
             )
+            health_data['sqs_access'] = 'healthy'
             
-            return {
+            # Test storage if available
+            if self.storage:
+                storage_health = self.storage.health_check()
+                health_data['storage'] = storage_health
+            
+            health_data.update({
                 'status': 'healthy',
-                'service': 'real_alert_processor',
-                'queue_configured': True,
                 'queue_url': self.queue_url
-            }
+            })
+            
+            return health_data
             
         except Exception as e:
             return {
                 'status': 'unhealthy',
                 'service': 'real_alert_processor',
-                'error': str(e)
+                'error': str(e),
+                'queue_configured': bool(self.queue_url),
+                'storage_enabled': bool(self.storage)
             }
