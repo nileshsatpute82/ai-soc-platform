@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: ai-soc-demo
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python demo_app.py
+    plan: starter
+    autoDeploy: true
+    branch: main
+    healthCheckPath: /health/
+    envVars:
+      - key: SECRET_KEY
+        value: demo-secret-key-12345
