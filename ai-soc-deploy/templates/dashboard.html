@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Security Operations Center</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/security-theme.css') }}">
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            🛡️ AI Security Operations Center
+        </div>
+        <div class="status-indicator">
+            <span class="status-dot"></span>
+            <span>LIVE</span>
+        </div>
+    </header>
+
+    <main class="dashboard">
+        <!-- Infrastructure & Integration Unit -->
+        <div class="module-card">
+            <div class="module-header">
+                <h2 class="module-title">🔧 Infrastructure & Integration</h2>
+                <span class="module-status status-active">ACTIVE</span>
+            </div>
+            <div class="module-content">
+                <p>Foundation services for data storage, AWS integration, and system monitoring.</p>
+                <div class="api-endpoint">GET /health/ - System Health</div>
+                <div class="api-endpoint">GET /api/config/ - Configuration</div>
+                <div id="health-status">
+                    <div class="loading"></div> Loading system health...
+                </div>
+                <button class="btn" id="refresh-btn">🔄 Refresh Status</button>
+            </div>
+        </div>
+
+        <!-- Core Platform Service Unit -->
+        <div class="module-card">
+            <div class="module-header">
+                <h2 class="module-title">⚡ Core Platform Service</h2>
+                <span class="module-status status-pending">PENDING</span>
+            </div>
+            <div class="module-content">
+                <p>Main orchestration engine for security alert processing and AI crew coordination.</p>
+                <div class="api-endpoint">POST /api/alerts/process - Alert Processing</div>
+                <div class="api-endpoint">GET /api/crews/status - AI Crew Status</div>
+                <div class="alert-item">
+                    📋 <strong>Next Development:</strong> Security alert orchestration and AI crew management
+                </div>
+                <button class="btn-secondary btn">🚧 Coming Soon</button>
+            </div>
+        </div>
+
+        <!-- Triage AI Crew Unit -->
+        <div class="module-card">
+            <div class="module-header">
+                <h2 class="module-title">🎯 Triage AI Crew</h2>
+                <span class="module-status status-pending">PENDING</span>
+            </div>
+            <div class="module-content">
+                <p>Automated alert prioritization and risk assessment using AI analysis.</p>
+                <div class="api-endpoint">POST /api/triage/analyze - Alert Triage</div>
+                <div class="api-endpoint">GET /api/triage/queue - Priority Queue</div>
+                <div class="alert-item">
+                    🤖 <strong>AI Capability:</strong> Real-time threat scoring and priority assignment
+                </div>
+                <button class="btn-secondary btn">🚧 Coming Soon</button>
+            </div>
+        </div>
+
+        <!-- Investigation AI Crew Unit -->
+        <div class="module-card">
+            <div class="module-header">
+                <h2 class="module-title">🔍 Investigation AI Crew</h2>
+                <span class="module-status status-pending">PENDING</span>
+            </div>
+            <div class="module-content">
+                <p>Autonomous incident investigation with detailed findings and MITRE ATT&CK mapping.</p>
+                <div class="api-endpoint">POST /api/investigate/incident - Start Investigation</div>
+                <div class="api-endpoint">GET /api/investigate/results - Investigation Results</div>
+                <div class="alert-item">
+                    🔬 <strong>AI Capability:</strong> Automated evidence collection and threat analysis
+                </div>
+                <button class="btn-secondary btn">🚧 Coming Soon</button>
+            </div>
+        </div>
+
+        <!-- MITRE ATT&CK Integration -->
+        <div class="module-card">
+            <div class="module-header">
+                <h2 class="module-title">🎯 MITRE ATT&CK Framework</h2>
+                <span class="module-status status-active">ACTIVE</span>
+            </div>
+            <div class="module-content">
+                <p>Security framework integration for threat technique mapping and analysis.</p>
+                <div class="api-endpoint">GET /api/mitre/techniques - Get Techniques</div>
+                <div class="api-endpoint">POST /api/mitre/map - Map Indicators</div>
+                <div id="mitre-status">
+                    <div class="loading"></div> Loading MITRE data...
+                </div>
+            </div>
+        </div>
+
+        <!-- Security Operations Demo -->
+        <div class="module-card">
+            <div class="module-header">
+                <h2 class="module-title">🚨 Live Security Operations</h2>
+                <span class="module-status status-active">DEMO MODE</span>
+            </div>
+            <div class="module-content">
+                <p>Demonstration of AI-powered security analysis and threat detection.</p>
+                <div class="api-endpoint">GET /demo/ - Run Security Demo</div>
+                <div id="demo-results">
+                    <div class="alert-item">
+                        Click "Run Demo" to see AI security operations in action
+                    </div>
+                </div>
+                <button class="btn" id="run-demo-btn">🚀 Run Security Demo</button>
+            </div>
+        </div>
+
+        <!-- Configuration Management -->
+        <div class="module-card">
+            <div class="module-header">
+                <h2 class="module-title">⚙️ Configuration Management</h2>
+                <span class="module-status status-active">ACTIVE</span>
+            </div>
+            <div class="module-content">
+                <p>System configuration and environment management.</p>
+                <div class="api-endpoint">GET /api/config/ - Get Configuration</div>
+                <div class="api-endpoint">PUT /api/config/{key} - Update Config</div>
+                <div id="config-status">
+                    <div class="loading"></div> Loading configuration...
+                </div>
+            </div>
+        </div>
+
+        <!-- Audit & Compliance -->
+        <div class="module-card">
+            <div class="module-header">
+                <h2 class="module-title">📋 Audit & Compliance</h2>
+                <span class="module-status status-active">ACTIVE</span>
+            </div>
+            <div class="module-content">
+                <p>Security event logging and compliance monitoring.</p>
+                <div class="api-endpoint">GET /api/audit/events - Get Events</div>
+                <div class="api-endpoint">POST /api/audit/events - Log Event</div>
+                <div id="audit-status">
+                    <div class="loading"></div> Loading audit events...
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>AI-Powered Security Operations Platform v1.0.0-demo | Infrastructure & Integration Unit Active</p>
+        <p>🔒 Secure • 🤖 AI-Powered • 🚀 Real-time • 🛡️ Enterprise-Grade</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>

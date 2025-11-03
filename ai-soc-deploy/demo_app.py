@@ -1,7 +1,7 @@
 """Demo Flask application with mock mode for immediate deployment."""
 
 import os
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template
 from mock_mode import (
     MockBedrockClient, MockRDSClient, MockDocumentDBClient,
     MockElastiCacheClient, MockSQSClient, MockConfigurationService,
@@ -29,7 +29,12 @@ def create_demo_app():
     
     @app.route('/')
     def home():
-        """Home page with API overview."""
+        """Security Operations Dashboard."""
+        return render_template('dashboard.html')
+    
+    @app.route('/api/')
+    def api_info():
+        """API information endpoint."""
         return jsonify({
             "name": "AI-Powered Security Operations Platform",
             "version": "1.0.0-demo",
