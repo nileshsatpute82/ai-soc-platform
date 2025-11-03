@@ -8,28 +8,24 @@ from mock_mode import (
     MockAuditService, MockMITREComponent
 )
 from core_platform import CorePlatformService
+from aws_integration import create_aws_integrated_services
 
 def create_demo_app():
-    """Create demo Flask application with mock services."""
+    """Create Flask application with AWS integration."""
     app = Flask(__name__)
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'demo-secret-key')
     
-    # Initialize mock services
-    config_service = MockConfigurationService()
-    audit_service = MockAuditService(config_service)
+    # Initialize AWS integrated services
+    services = create_aws_integrated_services()
     
-    # Mock AWS clients
-    bedrock_client = MockBedrockClient(config_service)
-    rds_client = MockRDSClient(config_service)
-    documentdb_client = MockDocumentDBClient(config_service)
-    elasticache_client = MockElastiCacheClient(config_service)
-    sqs_client = MockSQSClient(config_service)
-    
-    # Mock components
-    mitre_component = MockMITREComponent(None, config_service)
+    config_service = services['config_service']
+    audit_service = services['audit_service']
+    aws_clients = services['aws_clients']
+    mitre_component = services['mitre_component']
+    aws_manager = services['aws_manager']
     
     # Core Platform Service
-    core_platform = CorePlatformService(bedrock_client, mitre_component, audit_service)
+    core_platform = CorePlatformService(aws_clients['bedrock'], mitre_component, audit_service)
     
     @app.route('/')
     def home():
@@ -56,22 +52,27 @@ def create_demo_app():
                 "mitre": "/api/mitre/techniques",
                 "demo": "/demo/"
             },
-            "status": "running"
+            "status": "running",
+            "aws_integration": integration_status
         })
     
     @app.route('/health/')
     def health_check():
         """Overall system health check."""
+        # Get integration status
+        integration_status = aws_manager.get_integration_status()
+        
         health_status = {
             "status": "healthy",
-            "mode": "mock",
-            "timestamp": "2024-12-19T11:20:00Z",
+            "mode": integration_status["mode"],
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "aws_integration": integration_status,
             "components": {
-                "bedrock": bedrock_client.health_check(),
-                "rds": rds_client.health_check(),
-                "documentdb": documentdb_client.health_check(),
-                "elasticache": elasticache_client.health_check(),
-                "sqs": sqs_client.health_check(),
+                "bedrock": aws_clients['bedrock'].health_check(),
+                "rds": aws_clients['rds'].health_check(),
+                "documentdb": aws_clients['documentdb'].health_check(),
+                "elasticache": aws_clients['elasticache'].health_check(),
+                "sqs": aws_clients['sqs'].health_check(),
                 "audit_service": audit_service.health_check(),
                 "config_service": config_service.health_check(),
                 "mitre_component": mitre_component.health_check()
