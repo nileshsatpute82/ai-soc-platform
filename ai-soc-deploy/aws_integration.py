@@ -11,8 +11,10 @@ from mock_mode import (
     MockAuditService, MockMITREComponent
 )
 from real_aws_clients import (
-    RealBedrockClient, RealRDSClient, RealDocumentDBClient,
-    RealElastiCacheClient, RealSQSClient
+    RealBedrockClient, RealSQSClient
+)
+from real_database_clients import (
+    RealRDSClient, RealDocumentDBClient, RealElastiCacheClient
 )
 
 class AWSIntegrationManager:
@@ -64,7 +66,8 @@ class AWSIntegrationManager:
     
     def get_rds_client(self, config_service):
         """Get RDS client (real or mock)."""
-        if self.use_real_aws and self._has_rds_config():
+        enable_real_dbs = config_service.get('ENABLE_REAL_DATABASES', 'false').lower() == 'true'
+        if self.use_real_aws and enable_real_dbs and self._has_rds_config():
             try:
                 return RealRDSClient(config_service)
             except Exception as e:
@@ -75,7 +78,8 @@ class AWSIntegrationManager:
     
     def get_documentdb_client(self, config_service):
         """Get DocumentDB client (real or mock)."""
-        if self.use_real_aws and self._has_documentdb_config():
+        enable_real_dbs = config_service.get('ENABLE_REAL_DATABASES', 'false').lower() == 'true'
+        if self.use_real_aws and enable_real_dbs and self._has_documentdb_config():
             try:
                 return RealDocumentDBClient(config_service)
             except Exception as e:
@@ -86,7 +90,8 @@ class AWSIntegrationManager:
     
     def get_elasticache_client(self, config_service):
         """Get ElastiCache client (real or mock)."""
-        if self.use_real_aws and self._has_redis_config():
+        enable_real_dbs = config_service.get('ENABLE_REAL_DATABASES', 'false').lower() == 'true'
+        if self.use_real_aws and enable_real_dbs and self._has_redis_config():
             try:
                 return RealElastiCacheClient(config_service)
             except Exception as e:

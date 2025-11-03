@@ -28,8 +28,11 @@ def create_demo_app():
     # Core Platform Service
     core_platform = CorePlatformService(aws_clients['bedrock'], mitre_component, audit_service)
     
-    # Real Alert Processor
-    real_alerts = RealAlertProcessor(config_service)
+    # Real Alert Processor with database clients
+    from real_database_clients import RealRDSClient, RealDocumentDBClient
+    rds_client = aws_clients['rds'] if hasattr(aws_clients['rds'], 'connection') else None
+    docdb_client = aws_clients['documentdb'] if hasattr(aws_clients['documentdb'], 'client') else None
+    real_alerts = RealAlertProcessor(config_service, rds_client, docdb_client)
     
     @app.route('/')
     def home():
