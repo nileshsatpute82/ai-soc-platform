@@ -131,6 +131,24 @@ def create_demo_app():
                 'timestamp': time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
             }), 500
     
+    @app.route('/debug/rds/test')
+    def test_rds_query():
+        """Test actual RDS query to see error."""
+        try:
+            result = aws_clients['rds'].execute_query("SELECT 1 as test")
+            return jsonify({
+                'status': 'success',
+                'query_result': result,
+                'connection_type': type(aws_clients['rds']).__name__
+            })
+        except Exception as e:
+            return jsonify({
+                'status': 'error',
+                'error': str(e),
+                'error_type': type(e).__name__,
+                'connection_type': type(aws_clients['rds']).__name__
+            }), 500
+    
     @app.route('/api/config/')
     def get_config():
         """Get configuration."""
