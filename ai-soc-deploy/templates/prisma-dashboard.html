@@ -951,22 +951,32 @@
                         </div>
                         <div class="table-row">
                             <div class="row-main">
-                                <div class="row-title">🔍 INV-2024-002: Cross-Region API Reconnaissance</div>
-                                <div class="row-subtitle">Status: Completed • Assigned: AI Investigation Crew • Priority: MEDIUM • Completed: 1 day ago</div>
+                                <div class="row-title">🔍 INV-2024-002: Data Exfiltration via EC2</div>
+                                <div class="row-subtitle">Status: Completed • Assigned: AI Investigation Crew • Priority: CRITICAL • Completed: 6 hours ago</div>
                             </div>
                             <div class="row-meta">
-                                <span class="risk-badge risk-low">CLOSED</span>
+                                <span class="risk-badge risk-high">CRITICAL</span>
                                 <button class="btn btn-outline btn-sm" onclick="viewInvestigation('INV-2024-002')">View Report</button>
                             </div>
                         </div>
                         <div class="table-row">
                             <div class="row-main">
-                                <div class="row-title">🔍 INV-2024-003: Malicious Security Group Creation</div>
+                                <div class="row-title">🔍 INV-2024-003: Cross-Region Reconnaissance</div>
+                                <div class="row-subtitle">Status: Completed • Assigned: AI Investigation Crew • Priority: MEDIUM • Completed: 1 day ago</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-low">CLOSED</span>
+                                <button class="btn btn-outline btn-sm" onclick="viewInvestigation('INV-2024-003')">View Report</button>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🔍 INV-2024-004: Malicious Security Group Creation</div>
                                 <div class="row-subtitle">Status: Pending Review • Assigned: Human Analyst • Priority: HIGH • Escalated: 30 minutes ago</div>
                             </div>
                             <div class="row-meta">
                                 <span class="risk-badge risk-high">ESCALATED</span>
-                                <button class="btn btn-outline btn-sm" onclick="viewInvestigation('INV-2024-003')">Review</button>
+                                <button class="btn btn-outline btn-sm" onclick="viewInvestigation('INV-2024-004')">Review</button>
                             </div>
                         </div>
                     </div>
@@ -1978,13 +1988,45 @@
                     ]
                 },
                 'INV-2024-002': {
-                    title: 'Cross-Region API Reconnaissance',
+                    title: 'Data Exfiltration via EC2',
+                    status: 'Completed',
+                    priority: 'CRITICAL',
+                    findings: 'Compromised credentials used to launch EC2 instance and exfiltrate RDS data',
+                    mitre: 'T1078, T1059, T1005, T1041',
+                    progress: 100,
+                    currentStage: 'Completed',
+                    attackChain: [
+                        { step: 'Initial Access', icon: '🔑', desc: 'Stolen AWS access keys', time: '08:15', ip: '185.220.101.42' },
+                        { step: 'Persistence', icon: '🚀', desc: 'Launched EC2 instance', time: '08:18', resource: 'i-0a1b2c3d4e5f67890' },
+                        { step: 'Discovery', icon: '🔍', desc: 'Enumerated RDS instances', time: '08:22', target: 'prod-customer-db' },
+                        { step: 'Collection', icon: '📁', desc: 'SQL queries to extract data', time: '08:25', query: 'SELECT * FROM customers' },
+                        { step: 'Exfiltration', icon: '📤', desc: 'Data uploaded to external server', time: '08:35', size: '2.3 GB' }
+                    ],
+                    timeline: [
+                        { time: '08:15', event: 'Suspicious login from Tor exit node detected', status: 'complete' },
+                        { time: '08:16', event: 'AI Triage classified as CRITICAL priority', status: 'complete' },
+                        { time: '08:18', event: 'EC2 instance launched from compromised account', status: 'complete' },
+                        { time: '08:22', event: 'RDS enumeration activities detected', status: 'complete' },
+                        { time: '08:25', event: 'Suspicious SQL queries identified', status: 'complete' },
+                        { time: '08:35', event: 'Large data transfer to external IP detected', status: 'complete' },
+                        { time: '08:40', event: 'MITRE mapping: T1078, T1059, T1005, T1041', status: 'complete' },
+                        { time: '08:45', event: 'Critical risk assessment: Data breach confirmed', status: 'complete' },
+                        { time: '08:50', event: 'Incident response recommendations generated', status: 'complete' }
+                    ]
+                },
+                'INV-2024-003': {
+                    title: 'Cross-Region Reconnaissance',
                     status: 'Completed',
                     priority: 'MEDIUM',
                     findings: 'Automated scanning detected across multiple AWS regions',
                     mitre: 'T1087, T1580',
                     progress: 100,
                     currentStage: 'Completed',
+                    attackChain: [
+                        { step: 'Reconnaissance', icon: '🔍', desc: 'Cross-region API enumeration', time: '09:15', regions: '4 regions' },
+                        { step: 'Discovery', icon: '🌍', desc: 'Service discovery across regions', time: '09:18', services: 'EC2, S3, RDS' },
+                        { step: 'Collection', icon: '📊', desc: 'Infrastructure mapping', time: '09:25', resources: '127 resources' }
+                    ],
                     timeline: [
                         { time: '09:15', event: 'Cross-region API calls detected', status: 'complete' },
                         { time: '09:16', event: 'AI Triage classified as MEDIUM priority', status: 'complete' },
@@ -1995,7 +2037,7 @@
                         { time: '09:27', event: 'Recommendations generated', status: 'complete' }
                     ]
                 },
-                'INV-2024-003': {
+                'INV-2024-004': {
                     title: 'Malicious Security Group Creation',
                     status: 'Escalated',
                     priority: 'HIGH',
@@ -2003,6 +2045,11 @@
                     mitre: 'T1562',
                     progress: 95,
                     currentStage: 'Human Review Required',
+                    attackChain: [
+                        { step: 'Initial Access', icon: '🔑', desc: 'Compromised IAM credentials', time: '16:45', user: 'dev-admin' },
+                        { step: 'Defense Evasion', icon: '🛡️', desc: 'Created permissive security group', time: '16:47', sg: 'sg-malicious-001' },
+                        { step: 'Persistence', icon: '🔒', desc: 'Opened SSH access from anywhere', time: '16:48', rule: '0.0.0.0/0:22' }
+                    ],
                     timeline: [
                         { time: '16:45', event: 'Security group modification detected', status: 'complete' },
                         { time: '16:46', event: 'AI Triage classified as HIGH priority', status: 'complete' },
@@ -2023,6 +2070,57 @@
         
         function showInvestigationDiagram(invId, investigation) {
             const mainContent = document.querySelector('.main-content');
+            
+            // Generate attack chain HTML if available
+            let attackChainHtml = '';
+            if (investigation.attackChain) {
+                attackChainHtml = `
+                    <!-- Attack Chain Diagram -->
+                    <div class="data-table" style="margin-bottom: 24px;">
+                        <div class="table-header">
+                            <div class="table-title">🎯 Attack Chain Analysis</div>
+                        </div>
+                        <div class="table-content" style="padding: 20px; background: #f8f9fa;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                                ${investigation.attackChain.map((step, index) => `
+                                    <div style="text-align: center; flex: 1; min-width: 150px;">
+                                        <div style="width: 70px; height: 70px; border-radius: 50%; background: linear-gradient(135deg, #dc3545, #fd7e14); color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-size: 28px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">${step.icon}</div>
+                                        <div style="font-weight: 600; font-size: 12px; margin-bottom: 4px;">${step.step.toUpperCase()}</div>
+                                        <div style="font-size: 10px; color: #666; margin-bottom: 8px;">${step.desc}</div>
+                                        <div style="font-size: 9px; color: #007bff; font-weight: 600;">${step.time}</div>
+                                        ${step.ip ? `<div style="font-size: 8px; color: #dc3545;">IP: ${step.ip}</div>` : ''}
+                                        ${step.resource ? `<div style="font-size: 8px; color: #28a745;">Resource: ${step.resource}</div>` : ''}
+                                        ${step.size ? `<div style="font-size: 8px; color: #ffc107;">Size: ${step.size}</div>` : ''}
+                                        ${step.regions ? `<div style="font-size: 8px; color: #17a2b8;">${step.regions}</div>` : ''}
+                                        ${step.sg ? `<div style="font-size: 8px; color: #dc3545;">SG: ${step.sg}</div>` : ''}
+                                    </div>
+                                    ${index < investigation.attackChain.length - 1 ? '<div style="font-size: 24px; color: #dc3545; margin: 0 10px;">➡️</div>' : ''}
+                                `).join('')}
+                            </div>
+                            
+                            <!-- Attack Summary -->
+                            <div style="display: flex; justify-content: space-around; margin-top: 20px; padding-top: 20px; border-top: 2px solid #dc3545;">
+                                <div style="text-align: center;">
+                                    <div style="font-size: 18px; font-weight: 600; color: #dc3545;">${investigation.attackChain.length}</div>
+                                    <div style="font-size: 12px; color: #666;">Attack Steps</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 18px; font-weight: 600; color: #fd7e14;">${investigation.mitre.split(', ').length}</div>
+                                    <div style="font-size: 12px; color: #666;">MITRE Techniques</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 18px; font-weight: 600; color: #6f42c1;">${getAttackDuration(investigation.attackChain)}</div>
+                                    <div style="font-size: 12px; color: #666;">Attack Duration</div>
+                                </div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 18px; font-weight: 600; color: #20c997;">${investigation.priority}</div>
+                                    <div style="font-size: 12px; color: #666;">Severity Level</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
             
             // Generate timeline HTML
             let timelineHtml = '';
@@ -2098,6 +2196,8 @@
                         </div>
                     </div>
                 </div>
+                
+                ${attackChainHtml}
                 
                 <!-- Investigation Timeline -->
                 <div class="data-table">
@@ -2184,10 +2284,25 @@
         function getRecommendations(invId) {
             const recommendations = {
                 'INV-2024-001': 'Disable suspicious IAM users immediately, rotate access keys, implement MFA',
-                'INV-2024-002': 'Monitor for continued reconnaissance, implement API rate limiting, review access patterns',
-                'INV-2024-003': 'Block malicious security group, review network access controls, implement change approval process'
+                'INV-2024-002': 'IMMEDIATE: Rotate all AWS credentials, terminate EC2 instance i-0a1b2c3d4e5f67890, block IP 185.220.101.42, assess data breach impact',
+                'INV-2024-003': 'Monitor for continued reconnaissance, implement API rate limiting, review access patterns',
+                'INV-2024-004': 'Block malicious security group sg-malicious-001, review network access controls, implement change approval process'
             };
             return recommendations[invId] || 'Standard security recommendations apply';
+        }
+        
+        function getAttackDuration(attackChain) {
+            if (!attackChain || attackChain.length < 2) return 'N/A';
+            
+            const startTime = attackChain[0].time;
+            const endTime = attackChain[attackChain.length - 1].time;
+            
+            // Simple time calculation (assuming same day)
+            const start = new Date(`2024-01-01 ${startTime}:00`);
+            const end = new Date(`2024-01-01 ${endTime}:00`);
+            const diffMinutes = Math.floor((end - start) / 60000);
+            
+            return `${diffMinutes} min`;
         }
         
         function exportInvestigationReport(invId) {
