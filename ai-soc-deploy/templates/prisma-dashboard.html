@@ -840,17 +840,38 @@
                     <div class="table-header">
                         <div class="table-title">🔍 Active Investigations</div>
                         <div class="table-actions">
-                            <button class="btn btn-sm">New Investigation</button>
+                            <button class="btn btn-sm" onclick="startNewInvestigation()">New Investigation</button>
                         </div>
                     </div>
-                    <div class="table-content">
+                    <div class="table-content" id="investigations-content">
                         <div class="table-row">
                             <div class="row-main">
-                                <div class="row-title">Investigation Framework Ready</div>
-                                <div class="row-subtitle">AI-powered investigation tools available for security incident analysis</div>
+                                <div class="row-title">🔍 INV-2024-001: Suspicious IAM Activity</div>
+                                <div class="row-subtitle">Status: In Progress • Assigned: AI Investigation Crew • Priority: HIGH • Started: 2 hours ago</div>
                             </div>
                             <div class="row-meta">
-                                <span class="risk-badge risk-low">READY</span>
+                                <span class="risk-badge risk-warning">ACTIVE</span>
+                                <button class="btn btn-outline btn-sm" onclick="viewInvestigation('INV-2024-001')">View Details</button>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🔍 INV-2024-002: Cross-Region API Reconnaissance</div>
+                                <div class="row-subtitle">Status: Completed • Assigned: AI Investigation Crew • Priority: MEDIUM • Completed: 1 day ago</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-low">CLOSED</span>
+                                <button class="btn btn-outline btn-sm" onclick="viewInvestigation('INV-2024-002')">View Report</button>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🔍 INV-2024-003: Malicious Security Group Creation</div>
+                                <div class="row-subtitle">Status: Pending Review • Assigned: Human Analyst • Priority: HIGH • Escalated: 30 minutes ago</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-high">ESCALATED</span>
+                                <button class="btn btn-outline btn-sm" onclick="viewInvestigation('INV-2024-003')">Review</button>
                             </div>
                         </div>
                     </div>
@@ -1359,6 +1380,307 @@
             .catch(error => {
                 console.error('Error refreshing policy agent:', error);
             });
+        }
+        
+        // Investigation Functions
+        function startNewInvestigation() {
+            const mainContent = document.querySelector('.main-content');
+            mainContent.innerHTML = `
+                <div class="page-header">
+                    <h1 class="page-title">New Security Investigation</h1>
+                    <p class="page-subtitle">AI-powered investigation workflow</p>
+                </div>
+                
+                <div class="data-table">
+                    <div class="table-header">
+                        <div class="table-title">🔍 Investigation Setup</div>
+                        <div class="table-actions">
+                            <button class="btn btn-outline btn-sm" onclick="showInvestigationsView()">Back to Investigations</button>
+                        </div>
+                    </div>
+                    <div class="table-content">
+                        <form id="investigation-form" style="padding: 20px;">
+                            <div style="margin-bottom: 16px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Investigation Title:</label>
+                                <input type="text" id="inv-title" placeholder="e.g., Suspicious IAM Activity Investigation" 
+                                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                            </div>
+                            
+                            <div style="margin-bottom: 16px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Alert Source:</label>
+                                <select id="alert-source" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                    <option value="guardduty">AWS GuardDuty Finding</option>
+                                    <option value="cloudtrail">CloudTrail Anomaly</option>
+                                    <option value="manual">Manual Investigation</option>
+                                    <option value="ai-detected">AI Crew Detection</option>
+                                </select>
+                            </div>
+                            
+                            <div style="margin-bottom: 16px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Priority Level:</label>
+                                <select id="priority" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                    <option value="LOW">Low</option>
+                                    <option value="MEDIUM" selected>Medium</option>
+                                    <option value="HIGH">High</option>
+                                    <option value="CRITICAL">Critical</option>
+                                </select>
+                            </div>
+                            
+                            <div style="margin-bottom: 16px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Investigation Scope:</label>
+                                <textarea id="inv-scope" rows="4" placeholder="Describe what needs to be investigated..." 
+                                          style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;" required></textarea>
+                            </div>
+                            
+                            <div style="display: flex; gap: 12px;">
+                                <button type="submit" class="btn btn-sm" style="flex: 1;">🚀 Start AI Investigation</button>
+                                <button type="button" class="btn btn-outline btn-sm" onclick="showInvestigationsView()" style="flex: 1;">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            
+            // Add form submit handler
+            document.getElementById('investigation-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                launchInvestigation();
+            });
+        }
+        
+        function launchInvestigation() {
+            const title = document.getElementById('inv-title').value;
+            const source = document.getElementById('alert-source').value;
+            const priority = document.getElementById('priority').value;
+            const scope = document.getElementById('inv-scope').value;
+            
+            // Generate investigation ID
+            const invId = 'INV-2024-' + String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+            
+            // Show investigation in progress
+            const mainContent = document.querySelector('.main-content');
+            mainContent.innerHTML = `
+                <div class="page-header">
+                    <h1 class="page-title">Investigation ${invId} - In Progress</h1>
+                    <p class="page-subtitle">AI Investigation Crew is analyzing the security incident</p>
+                </div>
+                
+                <div class="data-table">
+                    <div class="table-header">
+                        <div class="table-title">🤖 AI Investigation Progress</div>
+                        <div class="table-actions">
+                            <button class="btn btn-outline btn-sm" onclick="showInvestigationsView()">Back to Investigations</button>
+                        </div>
+                    </div>
+                    <div class="table-content" id="investigation-progress">
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🔍 Investigation Details</div>
+                                <div class="row-subtitle">ID: ${invId} • Priority: ${priority} • Source: ${source} • Started: Just now</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-warning">ACTIVE</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">📋 Scope</div>
+                                <div class="row-subtitle">${scope}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="data-table" style="margin-top: 24px;">
+                    <div class="table-header">
+                        <div class="table-title">🤖 AI Crew Analysis Steps</div>
+                    </div>
+                    <div class="table-content" id="analysis-steps">
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">⏳ Initializing AI Investigation Crew...</div>
+                                <div class="row-subtitle">Setting up autonomous investigation agents</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="loading-spinner"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Simulate AI investigation progress
+            simulateInvestigationProgress(invId, title, priority, scope);
+        }
+        
+        function simulateInvestigationProgress(invId, title, priority, scope) {
+            const steps = [
+                { step: "🔍 Data Collection", desc: "Gathering CloudTrail logs, VPC Flow Logs, and GuardDuty findings", delay: 2000 },
+                { step: "🧠 Pattern Analysis", desc: "AI analyzing behavioral patterns and anomalies", delay: 3000 },
+                { step: "🎯 MITRE ATT&CK Mapping", desc: "Mapping indicators to MITRE ATT&CK framework", delay: 2500 },
+                { step: "🔗 Correlation Analysis", desc: "Correlating events across multiple AWS services", delay: 3500 },
+                { step: "🚨 Threat Assessment", desc: "Assessing threat severity and potential impact", delay: 2000 },
+                { step: "📊 Evidence Collection", desc: "Compiling evidence and generating investigation report", delay: 3000 },
+                { step: "✅ Investigation Complete", desc: "AI investigation completed with recommendations", delay: 1000 }
+            ];
+            
+            let currentStep = 0;
+            
+            function updateProgress() {
+                if (currentStep < steps.length) {
+                    const container = document.getElementById('analysis-steps');
+                    let html = '';
+                    
+                    // Show completed steps
+                    for (let i = 0; i <= currentStep; i++) {
+                        const isComplete = i < currentStep;
+                        const isCurrent = i === currentStep;
+                        
+                        html += `
+                            <div class="table-row">
+                                <div class="row-main">
+                                    <div class="row-title">${isComplete ? '✅' : (isCurrent ? '⏳' : '⏸️')} ${steps[i].step}</div>
+                                    <div class="row-subtitle">${steps[i].desc}</div>
+                                </div>
+                                <div class="row-meta">
+                                    <span class="risk-badge ${isComplete ? 'risk-low' : (isCurrent ? 'risk-warning' : 'risk-info')}">
+                                        ${isComplete ? 'COMPLETE' : (isCurrent ? 'RUNNING' : 'PENDING')}
+                                    </span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    container.innerHTML = html;
+                    
+                    if (currentStep === steps.length - 1) {
+                        // Investigation complete - show results
+                        setTimeout(() => showInvestigationResults(invId, title, priority, scope), 2000);
+                    } else {
+                        currentStep++;
+                        setTimeout(updateProgress, steps[currentStep - 1].delay);
+                    }
+                }
+            }
+            
+            updateProgress();
+        }
+        
+        function showInvestigationResults(invId, title, priority, scope) {
+            const mainContent = document.querySelector('.main-content');
+            mainContent.innerHTML = `
+                <div class="page-header">
+                    <h1 class="page-title">Investigation ${invId} - Complete</h1>
+                    <p class="page-subtitle">AI Investigation Results and Recommendations</p>
+                </div>
+                
+                <div class="data-table">
+                    <div class="table-header">
+                        <div class="table-title">📊 Investigation Summary</div>
+                        <div class="table-actions">
+                            <button class="btn btn-sm" onclick="exportInvestigationReport('${invId}')">📄 Export Report</button>
+                            <button class="btn btn-outline btn-sm" onclick="showInvestigationsView()">Back to Investigations</button>
+                        </div>
+                    </div>
+                    <div class="table-content">
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🎯 Threat Classification</div>
+                                <div class="row-subtitle">MITRE ATT&CK: T1078 (Valid Accounts), T1087 (Account Discovery)</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-${priority.toLowerCase()}">${priority}</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🔍 Key Findings</div>
+                                <div class="row-subtitle">Suspicious IAM user creation followed by privilege escalation attempts</div>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">📈 Risk Score</div>
+                                <div class="row-subtitle">AI-calculated risk score based on behavioral analysis and threat intelligence</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-high">8.5/10</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="data-table" style="margin-top: 24px;">
+                    <div class="table-header">
+                        <div class="table-title">🤖 AI Recommendations</div>
+                    </div>
+                    <div class="table-content">
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🚨 Immediate Actions</div>
+                                <div class="row-subtitle">1. Disable suspicious IAM user immediately<br>2. Rotate all access keys for affected account<br>3. Review CloudTrail logs for additional unauthorized activities</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-high">URGENT</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🛡️ Preventive Measures</div>
+                                <div class="row-subtitle">1. Implement MFA for all IAM users<br>2. Enable GuardDuty in all regions<br>3. Set up automated response for similar incidents</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-warning">RECOMMENDED</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">📋 Compliance Impact</div>
+                                <div class="row-subtitle">Potential RBI cybersecurity framework violation - incident reporting required within 24 hours</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-warning">COMPLIANCE</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function viewInvestigation(invId) {
+            // Show existing investigation details
+            const investigations = {
+                'INV-2024-001': {
+                    title: 'Suspicious IAM Activity',
+                    status: 'In Progress',
+                    priority: 'HIGH',
+                    findings: 'Multiple IAM users created with administrative privileges',
+                    mitre: 'T1078, T1136, T1098'
+                },
+                'INV-2024-002': {
+                    title: 'Cross-Region API Reconnaissance',
+                    status: 'Completed',
+                    priority: 'MEDIUM',
+                    findings: 'Automated scanning detected across multiple AWS regions',
+                    mitre: 'T1087, T1580'
+                },
+                'INV-2024-003': {
+                    title: 'Malicious Security Group Creation',
+                    status: 'Escalated',
+                    priority: 'HIGH',
+                    findings: 'Security group allowing unrestricted SSH access created',
+                    mitre: 'T1562'
+                }
+            };
+            
+            const inv = investigations[invId];
+            if (inv) {
+                showInvestigationResults(invId, inv.title, inv.priority, inv.findings);
+            }
+        }
+        
+        function exportInvestigationReport(invId) {
+            alert(`Investigation report ${invId} exported successfully!\n\nReport includes:\n• Executive Summary\n• Technical Findings\n• MITRE ATT&CK Mapping\n• Remediation Steps\n• Compliance Assessment`);
         }
         
         // Event listeners
