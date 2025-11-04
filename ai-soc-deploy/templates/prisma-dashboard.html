@@ -941,42 +941,42 @@
                     <div class="table-content" id="investigations-content">
                         <div class="table-row">
                             <div class="row-main">
-                                <div class="row-title">🔍 INV-2024-001: Suspicious IAM Activity</div>
+                                <div class="row-title">🔍 INV-2025-11-001: Suspicious IAM Activity</div>
                                 <div class="row-subtitle">Status: In Progress • Assigned: AI Investigation Crew • Priority: HIGH • Started: 2 hours ago</div>
                             </div>
                             <div class="row-meta">
                                 <span class="risk-badge risk-warning">ACTIVE</span>
-                                <button class="btn btn-outline btn-sm" onclick="viewInvestigation('INV-2024-001')">View Details</button>
+                                <button class="btn btn-outline btn-sm" onclick="viewInvestigation('INV-2025-11-001')">View Details</button>
                             </div>
                         </div>
                         <div class="table-row">
                             <div class="row-main">
-                                <div class="row-title">🔍 INV-2024-002: Data Exfiltration via EC2</div>
+                                <div class="row-title">🔍 INV-2025-11-002: Data Exfiltration via EC2</div>
                                 <div class="row-subtitle">Status: Completed • Assigned: AI Investigation Crew • Priority: CRITICAL • Completed: 6 hours ago</div>
                             </div>
                             <div class="row-meta">
                                 <span class="risk-badge risk-high">CRITICAL</span>
-                                <button class="btn btn-outline btn-sm" onclick="viewInvestigation('INV-2024-002')">View Report</button>
+                                <button class="btn btn-outline btn-sm" onclick="viewInvestigation('INV-2025-11-002')">View Report</button>
                             </div>
                         </div>
                         <div class="table-row">
                             <div class="row-main">
-                                <div class="row-title">🔍 INV-2024-003: Cross-Region Reconnaissance</div>
+                                <div class="row-title">🔍 INV-2025-11-003: Cross-Region Reconnaissance</div>
                                 <div class="row-subtitle">Status: Completed • Assigned: AI Investigation Crew • Priority: MEDIUM • Completed: 1 day ago</div>
                             </div>
                             <div class="row-meta">
                                 <span class="risk-badge risk-low">CLOSED</span>
-                                <button class="btn btn-outline btn-sm" onclick="viewInvestigation('INV-2024-003')">View Report</button>
+                                <button class="btn btn-outline btn-sm" onclick="viewInvestigation('INV-2025-11-003')">View Report</button>
                             </div>
                         </div>
                         <div class="table-row">
                             <div class="row-main">
-                                <div class="row-title">🔍 INV-2024-004: Malicious Security Group Creation</div>
+                                <div class="row-title">🔍 INV-2025-11-004: Malicious Security Group Creation</div>
                                 <div class="row-subtitle">Status: Pending Review • Assigned: Human Analyst • Priority: HIGH • Escalated: 30 minutes ago</div>
                             </div>
                             <div class="row-meta">
                                 <span class="risk-badge risk-high">ESCALATED</span>
-                                <button class="btn btn-outline btn-sm" onclick="viewInvestigation('INV-2024-004')">Review</button>
+                                <button class="btn btn-outline btn-sm" onclick="viewInvestigation('INV-2025-11-004')">Review</button>
                             </div>
                         </div>
                     </div>
@@ -1774,7 +1774,7 @@
             const scope = document.getElementById('inv-scope').value;
             
             // Generate investigation ID
-            const invId = 'INV-2024-' + String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+            const invId = 'INV-2025-11-' + String(Math.floor(Math.random() * 1000)).padStart(3, '0');
             
             // Show investigation in progress
             const mainContent = document.querySelector('.main-content');
@@ -1969,7 +1969,7 @@
         function viewInvestigation(invId) {
             // Show investigation-specific diagrams and details
             const investigations = {
-                'INV-2024-001': {
+                'INV-2025-11-001': {
                     title: 'Suspicious IAM Activity',
                     status: 'In Progress',
                     priority: 'HIGH',
@@ -1987,7 +1987,7 @@
                         { time: 'Pending', event: 'Generate recommendations', status: 'pending' }
                     ]
                 },
-                'INV-2024-002': {
+                'INV-2025-11-002': {
                     title: 'Data Exfiltration via EC2',
                     status: 'Completed',
                     priority: 'CRITICAL',
@@ -2014,7 +2014,7 @@
                         { time: '08:50', event: 'Incident response recommendations generated', status: 'complete' }
                     ]
                 },
-                'INV-2024-003': {
+                'INV-2025-11-003': {
                     title: 'Cross-Region Reconnaissance',
                     status: 'Completed',
                     priority: 'MEDIUM',
@@ -2037,7 +2037,7 @@
                         { time: '09:27', event: 'Recommendations generated', status: 'complete' }
                     ]
                 },
-                'INV-2024-004': {
+                'INV-2025-11-004': {
                     title: 'Malicious Security Group Creation',
                     status: 'Escalated',
                     priority: 'HIGH',
@@ -2283,10 +2283,10 @@
         
         function getRecommendations(invId) {
             const recommendations = {
-                'INV-2024-001': 'Disable suspicious IAM users immediately, rotate access keys, implement MFA',
-                'INV-2024-002': 'IMMEDIATE: Rotate all AWS credentials, terminate EC2 instance i-0a1b2c3d4e5f67890, block IP 185.220.101.42, assess data breach impact',
-                'INV-2024-003': 'Monitor for continued reconnaissance, implement API rate limiting, review access patterns',
-                'INV-2024-004': 'Block malicious security group sg-malicious-001, review network access controls, implement change approval process'
+                'INV-2025-11-001': 'Disable suspicious IAM users immediately, rotate access keys, implement MFA',
+                'INV-2025-11-002': 'IMMEDIATE: Rotate all AWS credentials, terminate EC2 instance i-0a1b2c3d4e5f67890, block IP 185.220.101.42, assess data breach impact',
+                'INV-2025-11-003': 'Monitor for continued reconnaissance, implement API rate limiting, review access patterns',
+                'INV-2025-11-004': 'Block malicious security group sg-malicious-001, review network access controls, implement change approval process'
             };
             return recommendations[invId] || 'Standard security recommendations apply';
         }
