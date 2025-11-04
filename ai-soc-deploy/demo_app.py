@@ -257,37 +257,41 @@ def create_demo_app():
     
     @app.route('/api/alerts/')
     def get_real_alerts():
-        """Get real security alerts from AWS SQS."""
+        """Get persistent security alerts from database + process new SQS alerts."""
         try:
-            # Get real alerts from SQS
-            real_aws_alerts = real_alerts.poll_alerts(max_messages=10)
+            # Process new alerts from SQS (saves to database)
+            new_alerts = real_alerts.poll_alerts(max_messages=10)
             
-            # Mock alerts for demo
-            mock_alerts = [
-                {
-                    'alert_id': 'demo-001',
-                    'timestamp': '2024-01-15T10:30:00Z',
-                    'severity': 'HIGH',
-                    'source': 'Demo Mode',
-                    'description': 'Demo: Suspicious login from unusual location',
-                    'event_type': 'Demo Alert'
-                },
-                {
-                    'alert_id': 'demo-002', 
-                    'timestamp': '2024-01-15T09:15:00Z',
-                    'severity': 'MEDIUM',
-                    'source': 'Demo Mode',
-                    'description': 'Demo: Unusual network traffic detected',
-                    'event_type': 'Demo Alert'
-                }
-            ]
+            # Get all stored alerts from database (persistent)
+            stored_alerts = real_alerts.get_stored_alerts(limit=50)
             
-            # Combine real and mock alerts
-            all_alerts = real_aws_alerts + mock_alerts
+            # Mock alerts for demo if no real alerts
+            if not stored_alerts:
+                mock_alerts = [
+                    {
+                        'alert_id': 'demo-001',
+                        'timestamp': '2024-01-15T10:30:00Z',
+                        'severity': 'HIGH',
+                        'source': 'Demo Mode',
+                        'description': 'Demo: Suspicious login from unusual location',
+                        'event_type': 'Demo Alert'
+                    },
+                    {
+                        'alert_id': 'demo-002', 
+                        'timestamp': '2024-01-15T09:15:00Z',
+                        'severity': 'MEDIUM',
+                        'source': 'Demo Mode',
+                        'description': 'Demo: Unusual network traffic detected',
+                        'event_type': 'Demo Alert'
+                    }
+                ]
+                stored_alerts = mock_alerts
+            
             return jsonify({
-                'alerts': all_alerts, 
-                'real_alerts_count': len(real_aws_alerts),
-                'total_count': len(all_alerts)
+                'alerts': stored_alerts, 
+                'new_alerts_processed': len(new_alerts),
+                'total_count': len(stored_alerts),
+                'source': 'persistent_database'
             })
         except Exception as e:
             return jsonify({"status": "error", "error": str(e)}), 500
