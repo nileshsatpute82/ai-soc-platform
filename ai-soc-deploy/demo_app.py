@@ -56,10 +56,10 @@ def create_demo_app():
     def api_info():
         """API information endpoint."""
         return jsonify({
-            "name": "AI-Powered Security Operations Platform",
+            "name": "Atlas CSMP",
             "version": "1.0.0-demo",
             "mode": "mock",
-            "description": "Infrastructure & Integration Unit - Demo Mode",
+            "description": "AWS-Native Cloud Security Posture Management Platform",
             "endpoints": {
                 "health": "/health/",
                 "config": "/api/config/",
@@ -213,7 +213,7 @@ def create_demo_app():
         mitre_mapping = mitre_component.map_to_mitre(["suspicious_login", "failed_auth"])
         
         return jsonify({
-            "demo": "AI Security Operations Platform",
+            "demo": "Atlas CSMP",
             "operations": {
                 "audit_event_logged": event_id,
                 "ai_analysis": ai_response,
