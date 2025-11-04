@@ -336,6 +336,36 @@
     </main>
 
     <script>
+        // Simple sidebar navigation - MUST work
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Dashboard loaded - setting up navigation');
+            
+            // Get all sidebar links
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+            console.log('Found sidebar links:', sidebarLinks.length);
+            
+            // Add click handlers
+            sidebarLinks.forEach((link, index) => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Clicked menu:', this.textContent.trim());
+                    
+                    // Remove active from all
+                    sidebarLinks.forEach(l => l.classList.remove('active'));
+                    // Add active to clicked
+                    this.classList.add('active');
+                    
+                    // Simple navigation
+                    const menuText = this.textContent.trim();
+                    if (menuText === 'Dashboard') {
+                        location.reload();
+                    } else {
+                        alert('Navigating to: ' + menuText);
+                    }
+                });
+            });
+        });
+        
         // Real-time alerts functionality
         function refreshRealAlerts() {
             const container = document.getElementById('real-alerts-content');
@@ -1304,69 +1334,7 @@
             document.getElementById('refresh-crews-btn').addEventListener('click', refreshCrewStatus);
             document.getElementById('health-check-btn').addEventListener('click', refreshSystemHealth);
             
-            // Sidebar menu navigation - Setup immediately
-            const sidebarLinks = document.querySelectorAll('.sidebar-link');
-            
-            sidebarLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    // Remove active class from all links
-                    sidebarLinks.forEach(l => l.classList.remove('active'));
-                    
-                    // Add active class to clicked link
-                    this.classList.add('active');
-                    
-                    // Get the menu item text
-                    const menuText = this.textContent.trim();
-                    
-                    // Handle different menu items
-                    switch(menuText) {
-                        case 'Dashboard':
-                            location.reload(); // Reload to show full dashboard
-                            break;
-                        case 'Security Alerts':
-                            showSecurityAlertsView();
-                            break;
-                        case 'Investigations':
-                            showInvestigationsView();
-                            break;
-                        case 'Threat Intelligence':
-                            showThreatIntelView();
-                            break;
-                        case 'Triage Crew':
-                            showTriageCrewView();
-                            break;
-                        case 'Investigation Crew':
-                            showInvestigationCrewView();
-                            break;
-                        case 'Network Security':
-                            showNetworkSecurityView();
-                            break;
-                        case 'Endpoint Security':
-                            showEndpointSecurityView();
-                            break;
-                        case 'Configuration':
-                            showConfigurationView();
-                            break;
-                        case 'Audit Logs':
-                            showAuditLogsView();
-                            break;
-                        case 'System Health':
-                            showSystemHealthView();
-                            break;
-                        case 'Policy Management':
-                            showPolicyManagementView();
-                            break;
-                        case 'RBI Compliance':
-                            showRBIComplianceView();
-                            break;
-                        case 'SEBI Compliance':
-                            showSEBIComplianceView();
-                            break;
-                    }
-                });
-            });
+
         });
     </script>
     <script src="{{ url_for('static', filename='js/prisma-dashboard.js') }}"></script>
