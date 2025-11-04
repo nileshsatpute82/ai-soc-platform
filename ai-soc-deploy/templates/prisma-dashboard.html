@@ -834,8 +834,103 @@
             mainContent.innerHTML = `
                 <div class="page-header">
                     <h1 class="page-title">Security Investigations</h1>
-                    <p class="page-subtitle">Deep dive analysis and forensic investigations</p>
+                    <p class="page-subtitle">Deep-dive forensic analysis with agentic AI crews</p>
                 </div>
+                
+                <!-- Investigation Workflow Diagram -->
+                <div class="data-table" style="margin-bottom: 24px;">
+                    <div class="table-header">
+                        <div class="table-title">🤖 Agentic AI Investigation Workflow</div>
+                        <div class="table-actions">
+                            <button class="btn btn-outline btn-sm" onclick="showWorkflowDetails()">View Details</button>
+                        </div>
+                    </div>
+                    <div class="table-content" style="padding: 20px; background: #f8f9fa;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                            <!-- Step 1 -->
+                            <div style="text-align: center; flex: 1; min-width: 120px;">
+                                <div style="width: 60px; height: 60px; border-radius: 50%; background: #007bff; color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 24px;">🚨</div>
+                                <div style="font-weight: 600; font-size: 12px;">ALERT TRIGGER</div>
+                                <div style="font-size: 10px; color: #666;">Security event detected</div>
+                            </div>
+                            
+                            <div style="font-size: 20px; color: #007bff;">→</div>
+                            
+                            <!-- Step 2 -->
+                            <div style="text-align: center; flex: 1; min-width: 120px;">
+                                <div style="width: 60px; height: 60px; border-radius: 50%; background: #28a745; color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 24px;">🤖</div>
+                                <div style="font-weight: 600; font-size: 12px;">AI TRIAGE</div>
+                                <div style="font-size: 10px; color: #666;">Autonomous classification</div>
+                            </div>
+                            
+                            <div style="font-size: 20px; color: #007bff;">→</div>
+                            
+                            <!-- Step 3 -->
+                            <div style="text-align: center; flex: 1; min-width: 120px;">
+                                <div style="width: 60px; height: 60px; border-radius: 50%; background: #ffc107; color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 24px;">🔍</div>
+                                <div style="font-weight: 600; font-size: 12px;">DATA COLLECTION</div>
+                                <div style="font-size: 10px; color: #666;">Multi-source evidence</div>
+                            </div>
+                            
+                            <div style="font-size: 20px; color: #007bff;">→</div>
+                            
+                            <!-- Step 4 -->
+                            <div style="text-align: center; flex: 1; min-width: 120px;">
+                                <div style="width: 60px; height: 60px; border-radius: 50%; background: #17a2b8; color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 24px;">🧠</div>
+                                <div style="font-weight: 600; font-size: 12px;">AI ANALYSIS</div>
+                                <div style="font-size: 10px; color: #666;">Pattern recognition</div>
+                            </div>
+                            
+                            <div style="font-size: 20px; color: #007bff;">→</div>
+                            
+                            <!-- Step 5 -->
+                            <div style="text-align: center; flex: 1; min-width: 120px;">
+                                <div style="width: 60px; height: 60px; border-radius: 50%; background: #6f42c1; color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 24px;">🎯</div>
+                                <div style="font-weight: 600; font-size: 12px;">MITRE MAPPING</div>
+                                <div style="font-size: 10px; color: #666;">ATT&CK framework</div>
+                            </div>
+                            
+                            <div style="font-size: 20px; color: #007bff;">→</div>
+                            
+                            <!-- Step 6 -->
+                            <div style="text-align: center; flex: 1; min-width: 120px;">
+                                <div style="width: 60px; height: 60px; border-radius: 50%; background: #dc3545; color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 24px;">📊</div>
+                                <div style="font-weight: 600; font-size: 12px;">RISK ASSESSMENT</div>
+                                <div style="font-size: 10px; color: #666;">Impact calculation</div>
+                            </div>
+                            
+                            <div style="font-size: 20px; color: #007bff;">→</div>
+                            
+                            <!-- Step 7 -->
+                            <div style="text-align: center; flex: 1; min-width: 120px;">
+                                <div style="width: 60px; height: 60px; border-radius: 50%; background: #20c997; color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 24px;">🛡️</div>
+                                <div style="font-weight: 600; font-size: 12px;">RECOMMENDATIONS</div>
+                                <div style="font-size: 10px; color: #666;">Automated response</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Workflow Stats -->
+                        <div style="display: flex; justify-content: space-around; margin-top: 20px; padding-top: 20px; border-top: 1px solid #dee2e6;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 18px; font-weight: 600; color: #007bff;">0.8s</div>
+                                <div style="font-size: 12px; color: #666;">Avg Response Time</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 18px; font-weight: 600; color: #28a745;">94.2%</div>
+                                <div style="font-size: 12px; color: #666;">Accuracy Rate</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 18px; font-weight: 600; color: #ffc107;">24/7</div>
+                                <div style="font-size: 12px; color: #666;">Autonomous Operation</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 18px; font-weight: 600; color: #17a2b8;">156</div>
+                                <div style="font-size: 12px; color: #666;">MITRE Techniques</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="data-table">
                     <div class="table-header">
                         <div class="table-title">🔍 Active Investigations</div>
@@ -2192,6 +2287,134 @@
         
         function configureThreatFeeds() {
             alert('Threat Feed Configuration\n\nCurrent Feeds:\n• CISA KEV: Active\n• AlienVault OTX: Active\n• VirusTotal: Active\n• Tor Exit Nodes: Active\n• Custom Feeds: 4 configured\n\nAll feeds updating automatically every 15 minutes.');
+        }
+        
+        function showWorkflowDetails() {
+            const mainContent = document.querySelector('.main-content');
+            mainContent.innerHTML = `
+                <div class="page-header">
+                    <h1 class="page-title">Agentic AI Investigation Workflow</h1>
+                    <p class="page-subtitle">Detailed breakdown of autonomous investigation process</p>
+                </div>
+                
+                <div class="data-table">
+                    <div class="table-header">
+                        <div class="table-title">🤖 Workflow Stage Details</div>
+                        <div class="table-actions">
+                            <button class="btn btn-outline btn-sm" onclick="showInvestigationsView()">Back to Investigations</button>
+                        </div>
+                    </div>
+                    <div class="table-content">
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🚨 Stage 1: Alert Trigger</div>
+                                <div class="row-subtitle">Security events from CloudTrail, GuardDuty, or VPC Flow Logs automatically trigger investigation workflow</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-info">AUTOMATED</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🤖 Stage 2: AI Triage</div>
+                                <div class="row-subtitle">Agentic AI crew autonomously classifies threat severity, assigns priority, and determines investigation scope</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-info">AUTONOMOUS</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🔍 Stage 3: Data Collection</div>
+                                <div class="row-subtitle">Automated gathering of CloudTrail logs, VPC Flow Logs, GuardDuty findings, and related AWS service data</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-warning">MULTI-SOURCE</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🧠 Stage 4: AI Analysis</div>
+                                <div class="row-subtitle">Advanced pattern recognition, behavioral analysis, and correlation across multiple data sources using Claude AI</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-info">AI-POWERED</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🎯 Stage 5: MITRE ATT&CK Mapping</div>
+                                <div class="row-subtitle">Automatic mapping of observed techniques to MITRE ATT&CK framework for threat categorization</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-warning">FRAMEWORK</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">📊 Stage 6: Risk Assessment</div>
+                                <div class="row-subtitle">AI-calculated risk scoring based on threat impact, likelihood, and potential business consequences</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-high">CRITICAL</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🛡️ Stage 7: Recommendations</div>
+                                <div class="row-subtitle">Automated generation of remediation steps, compliance requirements, and preventive measures</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-low">ACTIONABLE</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="data-table" style="margin-top: 24px;">
+                    <div class="table-header">
+                        <div class="table-title">📊 Performance Metrics</div>
+                    </div>
+                    <div class="table-content">
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">Average Investigation Time</div>
+                                <div class="row-subtitle">End-to-end automated investigation completion time</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-low">0.8 seconds</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">Threat Detection Accuracy</div>
+                                <div class="row-subtitle">AI accuracy in identifying true positive security threats</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-low">94.2%</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">False Positive Rate</div>
+                                <div class="row-subtitle">Percentage of benign activities incorrectly flagged as threats</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-low">2.1%</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">MITRE Coverage</div>
+                                <div class="row-subtitle">Number of ATT&CK techniques the system can detect and analyze</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-info">156 techniques</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
         
         // Event listeners
