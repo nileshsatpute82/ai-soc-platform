@@ -646,6 +646,43 @@ def create_demo_app():
         except Exception as e:
             return jsonify({'status': 'error', 'error': str(e)}), 500
     
+    @app.route('/api/policies/upload', methods=['POST'])
+    def upload_policy():
+        """Upload new policy for compliance monitoring."""
+        try:
+            from flask import request
+            policy_data = request.get_json()
+            
+            result = policy_agent.add_policy(
+                regulatory_body=policy_data['regulatory_body'],
+                policy_name=policy_data['policy_name'],
+                policy_section=policy_data['policy_section'],
+                policy_content=policy_data['policy_content'],
+                violation_keywords=policy_data.get('violation_keywords', ''),
+                default_severity=policy_data.get('default_severity', 'MEDIUM')
+            )
+            
+            return jsonify({
+                'status': 'success',
+                'message': f"Policy uploaded successfully",
+                'policy_id': result
+            })
+        except Exception as e:
+            return jsonify({'status': 'error', 'error': str(e)}), 500
+    
+    @app.route('/api/policies/list/<regulatory_body>')
+    def list_policies(regulatory_body):
+        """List policies for a regulatory body."""
+        try:
+            policies = policy_agent.get_policies(regulatory_body)
+            return jsonify({
+                'status': 'success',
+                'policies': policies,
+                'count': len(policies)
+            })
+        except Exception as e:
+            return jsonify({'status': 'error', 'error': str(e)}), 500
+    
     return app
 
 if __name__ == '__main__':

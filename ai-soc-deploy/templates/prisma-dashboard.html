@@ -1224,7 +1224,105 @@
         }
         
         function uploadPolicy(type) {
-            alert(`Upload ${type} Policy functionality - Integration with document management system`);
+            showPolicyUploadForm(type);
+        }
+        
+        function showPolicyUploadForm(type) {
+            const mainContent = document.querySelector('.main-content');
+            mainContent.innerHTML = `
+                <div class="page-header">
+                    <h1 class="page-title">Upload ${type} Policy</h1>
+                    <p class="page-subtitle">Add new ${type} compliance policy for automated violation detection</p>
+                </div>
+                
+                <div class="data-table">
+                    <div class="table-header">
+                        <div class="table-title">📜 ${type} Policy Upload</div>
+                        <div class="table-actions">
+                            <button class="btn btn-outline btn-sm" onclick="showPolicyManagementView()">Back to Policies</button>
+                        </div>
+                    </div>
+                    <div class="table-content">
+                        <form id="policy-upload-form" style="padding: 20px;">
+                            <div style="margin-bottom: 16px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Policy Name:</label>
+                                <input type="text" id="policy-name" placeholder="e.g., Data Protection Guidelines" 
+                                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                            </div>
+                            
+                            <div style="margin-bottom: 16px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Policy Section:</label>
+                                <input type="text" id="policy-section" placeholder="e.g., data_protection, incident_reporting" 
+                                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                            </div>
+                            
+                            <div style="margin-bottom: 16px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Policy Content:</label>
+                                <textarea id="policy-content" rows="8" placeholder="Enter the policy text that will be used for compliance checking..." 
+                                          style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;" required></textarea>
+                            </div>
+                            
+                            <div style="margin-bottom: 16px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Violation Keywords (comma-separated):</label>
+                                <input type="text" id="violation-keywords" placeholder="e.g., data breach, unauthorized access, malware" 
+                                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                            </div>
+                            
+                            <div style="margin-bottom: 16px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Default Severity:</label>
+                                <select id="default-severity" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                    <option value="LOW">Low</option>
+                                    <option value="MEDIUM" selected>Medium</option>
+                                    <option value="HIGH">High</option>
+                                    <option value="CRITICAL">Critical</option>
+                                </select>
+                            </div>
+                            
+                            <div style="display: flex; gap: 12px;">
+                                <button type="submit" class="btn btn-sm" style="flex: 1;">Upload Policy</button>
+                                <button type="button" class="btn btn-outline btn-sm" onclick="showPolicyManagementView()" style="flex: 1;">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            
+            // Add form submit handler
+            document.getElementById('policy-upload-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitPolicy(type);
+            });
+        }
+        
+        function submitPolicy(type) {
+            const formData = {
+                regulatory_body: type,
+                policy_name: document.getElementById('policy-name').value,
+                policy_section: document.getElementById('policy-section').value,
+                policy_content: document.getElementById('policy-content').value,
+                violation_keywords: document.getElementById('violation-keywords').value,
+                default_severity: document.getElementById('default-severity').value
+            };
+            
+            fetch('/api/policies/upload', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(`${type} policy uploaded successfully!`);
+                    showPolicyManagementView();
+                } else {
+                    alert(`Error uploading policy: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                alert(`Error uploading policy: ${error.message}`);
+            });
         }
         
         function refreshPolicyAgent() {

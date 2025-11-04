@@ -129,6 +129,22 @@ class AlertStorage:
                 )
             """)
             
+            # Regulatory policies table
+            self.rds.execute_command("""
+                CREATE TABLE IF NOT EXISTS regulatory_policies (
+                    id SERIAL PRIMARY KEY,
+                    policy_id VARCHAR(255) UNIQUE NOT NULL,
+                    regulatory_body VARCHAR(50) NOT NULL,
+                    policy_name VARCHAR(255) NOT NULL,
+                    policy_section VARCHAR(255) NOT NULL,
+                    policy_content TEXT NOT NULL,
+                    violation_keywords TEXT,
+                    default_severity VARCHAR(50) DEFAULT 'MEDIUM',
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            
             # Create indexes
             self.rds.execute_command("""
                 CREATE INDEX IF NOT EXISTS idx_alerts_timestamp ON security_alerts(timestamp);

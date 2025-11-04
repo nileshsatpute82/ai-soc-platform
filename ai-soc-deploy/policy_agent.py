@@ -289,3 +289,59 @@ class PolicyAgent:
         except Exception as e:
             print(f"Error getting violations: {e}")
             return []
+    
+    def add_policy(self, regulatory_body: str, policy_name: str, policy_section: str, 
+                   policy_content: str, violation_keywords: str = '', default_severity: str = 'MEDIUM') -> str:
+        """Add new policy to the system."""
+        try:
+            policy_id = f"{regulatory_body.lower()}_{policy_section}_{int(time.time())}"
+            
+            # Store in database
+            self.rds_client.execute_command("""
+                INSERT INTO regulatory_policies (
+                    policy_id, regulatory_body, policy_name, policy_section, 
+                    policy_content, violation_keywords, default_severity, created_at
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                policy_id, regulatory_body, policy_name, policy_section,
+                policy_content, violation_keywords, default_severity, datetime.utcnow().isoformat()
+            ))
+            
+            # Update in-memory policies
+            if regulatory_body.upper() == 'RBI':
+                self.rbi_policies[policy_section] = policy_content
+            elif regulatory_body.upper() == 'SEBI':
+                self.sebi_policies[policy_section] = policy_content
+            
+            return policy_id
+        except Exception as e:
+            print(f"Error adding policy: {e}")
+            raise e
+    
+    def get_policies(self, regulatory_body: str) -> List[Dict[str, Any]]:
+        """Get all policies for a regulatory body."""
+        try:
+            result = self.rds_client.execute_query("""
+                SELECT policy_id, policy_name, policy_section, policy_content, 
+                       violation_keywords, default_severity, created_at
+                FROM regulatory_policies
+                WHERE regulatory_body = %s
+                ORDER BY created_at DESC
+            """, (regulatory_body,))
+            
+            policies = []
+            for row in result:
+                policies.append({
+                    "policy_id": row[0],
+                    "policy_name": row[1],
+                    "policy_section": row[2],
+                    "policy_content": row[3],
+                    "violation_keywords": row[4],
+                    "default_severity": row[5],
+                    "created_at": row[6].isoformat() if hasattr(row[6], 'isoformat') else str(row[6])
+                })
+            
+            return policies
+        except Exception as e:
+            print(f"Error getting policies: {e}")
+            return []
