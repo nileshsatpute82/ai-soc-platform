@@ -10,6 +10,7 @@ from mock_mode import (
 from core_platform import CorePlatformService
 from aws_integration import create_aws_integrated_services
 from real_alert_processor import RealAlertProcessor
+from real_services import RealAuditService, RealMITREComponent
 
 def create_demo_app():
     """Create Flask application with AWS integration."""
@@ -20,10 +21,16 @@ def create_demo_app():
     services = create_aws_integrated_services()
     
     config_service = services['config_service']
-    audit_service = services['audit_service']
     aws_clients = services['aws_clients']
-    mitre_component = services['mitre_component']
     aws_manager = services['aws_manager']
+    
+    # Use real services if RDS is available, otherwise fallback to mock
+    if hasattr(aws_clients['rds'], 'execute_query'):
+        audit_service = RealAuditService(aws_clients['rds'], config_service)
+        mitre_component = RealMITREComponent(aws_clients['rds'], config_service)
+    else:
+        audit_service = services['audit_service']
+        mitre_component = services['mitre_component']
     
     # Core Platform Service
     core_platform = CorePlatformService(aws_clients['bedrock'], mitre_component, audit_service)
@@ -411,6 +418,56 @@ def create_demo_app():
                         'status_distribution': {},
                         'timeline': {},
                         'total_alerts': 0
+                    },
+                    'source': 'fallback'
+                })
+        except Exception as e:
+            return jsonify({"status": "error", "error": str(e)}), 500
+    
+    @app.route('/api/dashboard/performance')
+    def get_performance_metrics():
+        """Get AI performance metrics from database."""
+        try:
+            if real_alerts.storage:
+                metrics = real_alerts.storage.get_ai_performance_metrics()
+                return jsonify({
+                    'status': 'success',
+                    'performance': metrics,
+                    'source': 'database'
+                })
+            else:
+                return jsonify({
+                    'status': 'success',
+                    'performance': {
+                        'avg_response_time_ms': 1500,
+                        'avg_accuracy': 0.92,
+                        'active_crews': 3,
+                        'total_processed_24h': 0
+                    },
+                    'source': 'fallback'
+                })
+        except Exception as e:
+            return jsonify({"status": "error", "error": str(e)}), 500
+    
+    @app.route('/api/dashboard/mitre-stats')
+    def get_mitre_stats():
+        """Get MITRE technique statistics."""
+        try:
+            if hasattr(mitre_component, 'get_technique_stats'):
+                stats = mitre_component.get_technique_stats()
+                return jsonify({
+                    'status': 'success',
+                    'mitre_stats': stats,
+                    'source': 'database'
+                })
+            else:
+                return jsonify({
+                    'status': 'success',
+                    'mitre_stats': {
+                        'total_techniques': 0,
+                        'active_techniques': 0,
+                        'top_tactic': 'Unknown',
+                        'total_detections': 0
                     },
                     'source': 'fallback'
                 })
