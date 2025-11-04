@@ -683,6 +683,81 @@ def create_demo_app():
         except Exception as e:
             return jsonify({'status': 'error', 'error': str(e)}), 500
     
+    @app.route('/debug/sqs')
+    def debug_sqs():
+        """Debug SQS queue status and recent messages."""
+        try:
+            import boto3
+            
+            # Get SQS queue info
+            queue_url = config_service.get('AWS_SQS_QUEUE_URL')
+            if not queue_url:
+                return jsonify({
+                    'status': 'error',
+                    'message': 'AWS_SQS_QUEUE_URL not configured',
+                    'queue_url': None
+                })
+            
+            sqs = boto3.client('sqs', region_name=config_service.get('AWS_REGION', 'us-east-1'))
+            
+            # Get queue attributes
+            attrs = sqs.get_queue_attributes(
+                QueueUrl=queue_url,
+                AttributeNames=['All']
+            )
+            
+            # Try to peek at messages without deleting them
+            messages = sqs.receive_message(
+                QueueUrl=queue_url,
+                MaxNumberOfMessages=10,
+                WaitTimeSeconds=1,
+                MessageAttributeNames=['All']
+            )
+            
+            # Process new alerts to force database update
+            new_alerts = real_alerts.poll_alerts(max_messages=5)
+            
+            return jsonify({
+                'status': 'success',
+                'queue_url': queue_url,
+                'queue_attributes': attrs.get('Attributes', {}),
+                'messages_available': len(messages.get('Messages', [])),
+                'new_alerts_processed': len(new_alerts),
+                'recent_alerts': new_alerts[:3] if new_alerts else [],
+                'timestamp': time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+            })
+            
+        except Exception as e:
+            return jsonify({
+                'status': 'error',
+                'error': str(e),
+                'timestamp': time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+            }), 500
+    
+    @app.route('/api/alerts/force-poll', methods=['POST'])
+    def force_poll_alerts():
+        """Force poll SQS for new alerts and update database."""
+        try:
+            # Force poll SQS queue
+            new_alerts = real_alerts.poll_alerts(max_messages=20)
+            
+            # Get updated stored alerts
+            stored_alerts = real_alerts.get_stored_alerts(limit=10)
+            
+            return jsonify({
+                'status': 'success',
+                'new_alerts_found': len(new_alerts),
+                'total_stored_alerts': len(stored_alerts),
+                'latest_alerts': stored_alerts[:5],
+                'message': f'Processed {len(new_alerts)} new alerts from SQS'
+            })
+            
+        except Exception as e:
+            return jsonify({
+                'status': 'error',
+                'error': str(e)
+            }), 500
+    
     return app
 
 if __name__ == '__main__':
