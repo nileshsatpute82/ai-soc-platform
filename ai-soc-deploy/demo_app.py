@@ -171,15 +171,26 @@ def create_demo_app():
             "count": len(events)
         })
     
-    @app.route('/api/mitre/techniques')
+    @app.route('/api/mitre/techniques/')
     def get_mitre_techniques():
-        """Get MITRE techniques."""
-        techniques = mitre_component.get_techniques()
-        return jsonify({
-            "status": "success",
-            "techniques": techniques,
-            "count": len(techniques)
-        })
+        """Get MITRE techniques for dashboard."""
+        try:
+            if hasattr(mitre_component, 'get_techniques'):
+                techniques = mitre_component.get_techniques()
+            else:
+                # Fallback to database query if available
+                if real_alerts.storage:
+                    techniques = real_alerts.storage.get_mitre_techniques()
+                else:
+                    techniques = []
+            
+            return jsonify({
+                "status": "success",
+                "techniques": techniques,
+                "total_count": len(techniques)
+            })
+        except Exception as e:
+            return jsonify({"status": "error", "error": str(e)}), 500
     
     @app.route('/demo/')
     def demo_operations():
@@ -531,6 +542,41 @@ def create_demo_app():
                 'status': 'error',
                 'error': str(e),
                 'timestamp': time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+            }), 500
+    
+    @app.route('/api/demo/populate-mitre', methods=['POST'])
+    def populate_mitre_demo_data():
+        """Populate MITRE techniques with demo detection data."""
+        try:
+            if real_alerts.storage:
+                # Add some detection counts to existing MITRE techniques
+                techniques_to_update = [
+                    ('T1078', 5),  # Valid Accounts - 5 detections
+                    ('T1110', 3),  # Brute Force - 3 detections
+                    ('T1136', 2),  # Create Account - 2 detections
+                    ('T1098', 1),  # Account Manipulation - 1 detection
+                    ('T1087', 4)   # Account Discovery - 4 detections
+                ]
+                
+                for tech_id, count in techniques_to_update:
+                    for _ in range(count):
+                        real_alerts.storage.update_mitre_detection(tech_id)
+                
+                return jsonify({
+                    'status': 'success',
+                    'message': f'Updated {len(techniques_to_update)} MITRE techniques with demo detection data',
+                    'techniques_updated': len(techniques_to_update)
+                })
+            else:
+                return jsonify({
+                    'status': 'error',
+                    'message': 'Database storage not available'
+                }), 500
+                
+        except Exception as e:
+            return jsonify({
+                'status': 'error',
+                'error': str(e)
             }), 500
     
     return app

@@ -170,10 +170,24 @@
                     </div>
                     <span class="metric-status status-active">EXCELLENT</span>
                 </div>
-                <div class="metric-value">94.2%</div>
+                <div class="metric-value" id="ai-accuracy">94.2%</div>
                 <div class="metric-label">AI threat detection accuracy</div>
                 <div class="metric-change change-positive">
                     ↗️ +2.1% this week
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-header">
+                    <div class="metric-title">
+                        🛡️ MITRE ATT&CK
+                    </div>
+                    <span class="metric-status status-warning">TRACKING</span>
+                </div>
+                <div class="metric-value" id="mitre-techniques">0</div>
+                <div class="metric-label">Active threat techniques detected</div>
+                <div class="metric-change change-neutral" id="mitre-change">
+                    📊 Loading MITRE data...
                 </div>
             </div>
         </div>
@@ -250,6 +264,29 @@
             </div>
         </div>
 
+        <!-- MITRE ATT&CK Techniques -->
+        <div class="data-table" style="margin-top: 24px;">
+            <div class="table-header">
+                <div class="table-title">🛡️ MITRE ATT&CK Techniques</div>
+                <div class="table-actions">
+                    <button class="btn btn-outline btn-sm" id="refresh-mitre-btn">
+                        🔄 Refresh MITRE
+                    </button>
+                </div>
+            </div>
+            <div class="table-content" id="mitre-techniques-content">
+                <div class="table-row">
+                    <div class="row-main">
+                        <div class="row-title">Loading MITRE ATT&CK techniques...</div>
+                        <div class="row-subtitle">Analyzing threat techniques from security alerts</div>
+                    </div>
+                    <div class="row-meta">
+                        <span class="loading-spinner"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- System Health -->
         <div class="data-table" style="margin-top: 24px;">
             <div class="table-header">
@@ -302,6 +339,44 @@
                     <div class="table-row">
                         <div class="row-main">
                             <div class="row-title">Error loading alerts</div>
+                            <div class="row-subtitle">${error.message}</div>
+                        </div>
+                        <div class="row-meta">
+                            <span class="risk-badge risk-high">ERROR</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
+        // MITRE ATT&CK techniques functionality
+        function refreshMITRETechniques() {
+            const container = document.getElementById('mitre-techniques-content');
+            container.innerHTML = `
+                <div class="table-row">
+                    <div class="row-main">
+                        <div class="row-title">Loading MITRE techniques...</div>
+                        <div class="row-subtitle">Analyzing threat techniques</div>
+                    </div>
+                    <div class="row-meta">
+                        <span class="loading-spinner"></span>
+                    </div>
+                </div>
+            `;
+            
+            fetch('/api/mitre/techniques/')
+            .then(response => response.json())
+            .then(data => {
+                displayMITRETechniques(data.techniques, data.total_count);
+                // Update MITRE counter
+                document.getElementById('mitre-techniques').textContent = data.total_count;
+                document.getElementById('mitre-change').innerHTML = `📊 ${data.total_count} techniques detected`;
+            })
+            .catch(error => {
+                container.innerHTML = `
+                    <div class="table-row">
+                        <div class="row-main">
+                            <div class="row-title">Error loading MITRE data</div>
                             <div class="row-subtitle">${error.message}</div>
                         </div>
                         <div class="row-meta">
@@ -381,16 +456,74 @@
             return `${Math.floor(diffMins / 1440)}d ago`;
         }
         
+        function displayMITRETechniques(techniques, totalCount) {
+            const container = document.getElementById('mitre-techniques-content');
+            
+            if (!techniques || techniques.length === 0) {
+                container.innerHTML = `
+                    <div class="table-row">
+                        <div class="row-main">
+                            <div class="row-title">No MITRE techniques detected</div>
+                            <div class="row-subtitle">Process security alerts to detect threat techniques</div>
+                        </div>
+                        <div class="row-meta">
+                            <span class="risk-badge risk-low">CLEAR</span>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = `
+                <div class="table-row" style="background: #f8f9fa; border-bottom: 2px solid #e9ecef;">
+                    <div class="row-main">
+                        <div class="row-title">📊 MITRE ATT&CK Summary</div>
+                        <div class="row-subtitle">Total: ${totalCount} threat techniques detected across all alerts</div>
+                    </div>
+                    <div class="row-meta">
+                        <span class="risk-badge ${totalCount > 0 ? 'risk-warning' : 'risk-low'}">${totalCount > 0 ? 'ACTIVE' : 'CLEAR'}</span>
+                    </div>
+                </div>
+            `;
+            
+            techniques.forEach(technique => {
+                const severityClass = technique.severity ? technique.severity.toLowerCase() : 'medium';
+                const timeAgo = getTimeAgo(technique.detected_at);
+                
+                html += `
+                    <div class="table-row">
+                        <div class="row-main">
+                            <div class="row-title">
+                                🛡️ ${technique.technique_id}: ${technique.technique_name}
+                            </div>
+                            <div class="row-subtitle">
+                                Tactic: ${technique.tactic} • Detection Count: ${technique.detection_count} • ${timeAgo}
+                            </div>
+                        </div>
+                        <div class="row-meta">
+                            <span class="risk-badge risk-${severityClass}">${technique.severity || 'MEDIUM'}</span>
+                            <span class="risk-badge risk-info">COUNT: ${technique.detection_count}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
         // Event listeners
         document.addEventListener('DOMContentLoaded', function() {
-            // Load alerts on page load
+            // Load alerts and MITRE data on page load
             refreshRealAlerts();
+            refreshMITRETechniques();
             
             // Auto-refresh every 30 seconds
             setInterval(refreshRealAlerts, 30000);
+            setInterval(refreshMITRETechniques, 45000);
             
-            // Refresh button
+            // Refresh buttons
             document.getElementById('refresh-alerts-btn').addEventListener('click', refreshRealAlerts);
+            document.getElementById('refresh-mitre-btn').addEventListener('click', refreshMITRETechniques);
         });
     </script>
     <script src="{{ url_for('static', filename='js/prisma-dashboard.js') }}"></script>

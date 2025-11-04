@@ -100,12 +100,13 @@ class RealMITREComponent:
             techniques = []
             for row in result:
                 techniques.append({
-                    'id': row[0],
-                    'name': row[1],
+                    'technique_id': row[0],
+                    'technique_name': row[1],
                     'tactic': row[2],
                     'description': row[3],
-                    'detections': row[4] or 0,
-                    'last_detected': row[5].isoformat() if row[5] and hasattr(row[5], 'isoformat') else None
+                    'detection_count': row[4] or 0,
+                    'detected_at': row[5].isoformat() if row[5] and hasattr(row[5], 'isoformat') else None,
+                    'severity': 'MEDIUM'  # Default severity
                 })
             
             return techniques
