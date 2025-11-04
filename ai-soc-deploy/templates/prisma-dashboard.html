@@ -493,27 +493,86 @@
         
         function displayCrewStatus(crews) {
             const container = document.getElementById('crew-status-content');
-            const crewList = [
-                {name: 'Triage Crew', status: 'active', description: 'AI-powered alert triage and prioritization'},
-                {name: 'Investigation Crew', status: 'active', description: 'Deep security investigation and analysis'},
-                {name: 'Network Security', status: 'active', description: 'Network traffic analysis and monitoring'},
-                {name: 'Endpoint Security', status: 'active', description: 'Endpoint threat detection and response'}
-            ];
             
             let html = '';
-            crewList.forEach(crew => {
+            
+            // Display triage crew
+            if (crews.triage_crew) {
+                const crew = crews.triage_crew;
                 html += `
                     <div class="table-row">
                         <div class="row-main">
-                            <div class="row-title">🤖 ${crew.name}</div>
-                            <div class="row-subtitle">${crew.description}</div>
+                            <div class="row-title">🤖 Triage Crew</div>
+                            <div class="row-subtitle">Processed: ${crew.alerts_processed} alerts • Avg Time: ${crew.avg_processing_time} • Accuracy: ${crew.accuracy}</div>
                         </div>
                         <div class="row-meta">
-                            <span class="risk-badge risk-low">ACTIVE</span>
+                            <span class="risk-badge risk-low">${crew.status.toUpperCase()}</span>
                         </div>
                     </div>
                 `;
-            });
+            }
+            
+            // Display investigation crew
+            if (crews.investigation_crew) {
+                const crew = crews.investigation_crew;
+                html += `
+                    <div class="table-row">
+                        <div class="row-main">
+                            <div class="row-title">🔍 Investigation Crew</div>
+                            <div class="row-subtitle">Completed: ${crew.investigations_completed} investigations • Avg Time: ${crew.avg_investigation_time} • Success: ${crew.success_rate}</div>
+                        </div>
+                        <div class="row-meta">
+                            <span class="risk-badge risk-low">${crew.status.toUpperCase()}</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Display network security crew
+            if (crews.network_security_crew) {
+                const crew = crews.network_security_crew;
+                html += `
+                    <div class="table-row">
+                        <div class="row-main">
+                            <div class="row-title">🌐 Network Security Crew</div>
+                            <div class="row-subtitle">Events: ${crew.network_events_analyzed} • Threats Blocked: ${crew.threats_blocked} • False Positive: ${crew.false_positive_rate}</div>
+                        </div>
+                        <div class="row-meta">
+                            <span class="risk-badge risk-low">${crew.status.toUpperCase()}</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Display endpoint security crew
+            if (crews.endpoint_security_crew) {
+                const crew = crews.endpoint_security_crew;
+                html += `
+                    <div class="table-row">
+                        <div class="row-main">
+                            <div class="row-title">💻 Endpoint Security Crew</div>
+                            <div class="row-subtitle">Endpoints: ${crew.endpoints_monitored} • Malware Detected: ${crew.malware_detected} • Quarantine Success: ${crew.quarantine_success}</div>
+                        </div>
+                        <div class="row-meta">
+                            <span class="risk-badge risk-low">${crew.status.toUpperCase()}</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (html === '') {
+                html = `
+                    <div class="table-row">
+                        <div class="row-main">
+                            <div class="row-title">No crew data available</div>
+                            <div class="row-subtitle">AI crews are initializing...</div>
+                        </div>
+                        <div class="row-meta">
+                            <span class="risk-badge risk-warning">LOADING</span>
+                        </div>
+                    </div>
+                `;
+            }
             
             container.innerHTML = html;
         }
