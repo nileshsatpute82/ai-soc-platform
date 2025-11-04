@@ -417,6 +417,65 @@ def create_demo_app():
         except Exception as e:
             return jsonify({"status": "error", "error": str(e)}), 500
     
+    @app.route('/debug/database')
+    def inspect_database():
+        """Show all database tables and their contents."""
+        try:
+            db_data = {}
+            
+            # List of tables to inspect
+            tables = [
+                'security_alerts',
+                'dashboard_metrics', 
+                'activity_timeline',
+                'mitre_techniques',
+                'system_components'
+            ]
+            
+            for table in tables:
+                try:
+                    # Get table structure
+                    structure = aws_clients['rds'].execute_query(f"""
+                        SELECT column_name, data_type 
+                        FROM information_schema.columns 
+                        WHERE table_name = '{table}'
+                        ORDER BY ordinal_position
+                    """)
+                    
+                    # Get table data (limit to 10 rows)
+                    data = aws_clients['rds'].execute_query(f"SELECT * FROM {table} LIMIT 10")
+                    
+                    # Get row count
+                    count_result = aws_clients['rds'].execute_query(f"SELECT COUNT(*) FROM {table}")
+                    row_count = count_result[0][0] if count_result else 0
+                    
+                    db_data[table] = {
+                        'structure': [{'column': col[0], 'type': col[1]} for col in structure] if structure else [],
+                        'sample_data': data if data else [],
+                        'total_rows': row_count,
+                        'status': 'exists'
+                    }
+                    
+                except Exception as e:
+                    db_data[table] = {
+                        'status': 'error',
+                        'error': str(e)
+                    }
+            
+            return jsonify({
+                'status': 'success',
+                'database': 'postgresql',
+                'tables': db_data,
+                'timestamp': time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+            })
+            
+        except Exception as e:
+            return jsonify({
+                'status': 'error',
+                'error': str(e),
+                'timestamp': time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+            }), 500
+    
     return app
 
 if __name__ == '__main__':
