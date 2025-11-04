@@ -355,12 +355,37 @@
                     // Add active to clicked
                     this.classList.add('active');
                     
-                    // Simple navigation
+                    // Navigation logic
                     const menuText = this.textContent.trim();
-                    if (menuText === 'Dashboard') {
+                    
+                    if (menuText.includes('Dashboard')) {
                         location.reload();
-                    } else {
-                        alert('Navigating to: ' + menuText);
+                    } else if (menuText.includes('Security Alerts')) {
+                        showSecurityAlertsView();
+                    } else if (menuText.includes('Investigations')) {
+                        showInvestigationsView();
+                    } else if (menuText.includes('Threat Intelligence')) {
+                        showThreatIntelView();
+                    } else if (menuText.includes('Triage Crew')) {
+                        showTriageCrewView();
+                    } else if (menuText.includes('Investigation Crew')) {
+                        showInvestigationCrewView();
+                    } else if (menuText.includes('Network Security')) {
+                        showNetworkSecurityView();
+                    } else if (menuText.includes('Endpoint Security')) {
+                        showEndpointSecurityView();
+                    } else if (menuText.includes('Policy Management')) {
+                        showPolicyManagementView();
+                    } else if (menuText.includes('RBI Compliance')) {
+                        showRBIComplianceView();
+                    } else if (menuText.includes('SEBI Compliance')) {
+                        showSEBIComplianceView();
+                    } else if (menuText.includes('Configuration')) {
+                        showConfigurationView();
+                    } else if (menuText.includes('Audit Logs')) {
+                        showAuditLogsView();
+                    } else if (menuText.includes('System Health')) {
+                        showSystemHealthView();
                     }
                 });
             });
@@ -765,17 +790,39 @@
         
         // View Functions for Menu Items
         function showSecurityAlertsView() {
-            document.querySelector('.page-title').textContent = 'Security Alerts Management';
-            document.querySelector('.page-subtitle').textContent = 'Real-time security alert monitoring and response';
-            
             const mainContent = document.querySelector('.main-content');
-            const dashboardGrid = mainContent.querySelector('.dashboard-grid');
-            const dataTables = mainContent.querySelectorAll('.data-table');
+            mainContent.innerHTML = `
+                <div class="page-header">
+                    <h1 class="page-title">Security Alerts Management</h1>
+                    <p class="page-subtitle">Real-time security alert monitoring and response</p>
+                </div>
+                <div class="data-table">
+                    <div class="table-header">
+                        <div class="table-title">🚨 Active Security Alerts</div>
+                        <div class="table-actions">
+                            <button class="btn btn-sm" onclick="refreshRealAlerts()">🔄 Refresh</button>
+                        </div>
+                    </div>
+                    <div class="table-content" id="alerts-view-content">
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">Loading security alerts...</div>
+                                <div class="row-subtitle">Fetching real-time alerts from all sources</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="loading-spinner"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
             
-            // Hide dashboard grid, show only alerts table
-            dashboardGrid.style.display = 'none';
-            dataTables.forEach((table, index) => {
-                table.style.display = index === 1 ? 'block' : 'none'; // Show only Real-Time Alerts
+            // Load alerts data
+            fetch('/api/alerts/')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('alerts-view-content');
+                displayRealAlerts(data.alerts, data.real_alerts_count, data.total_count);
             });
         }
         
