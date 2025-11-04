@@ -1957,35 +1957,237 @@
         }
         
         function viewInvestigation(invId) {
-            // Show existing investigation details
+            // Show investigation-specific diagrams and details
             const investigations = {
                 'INV-2024-001': {
                     title: 'Suspicious IAM Activity',
                     status: 'In Progress',
                     priority: 'HIGH',
                     findings: 'Multiple IAM users created with administrative privileges',
-                    mitre: 'T1078, T1136, T1098'
+                    mitre: 'T1078, T1136, T1098',
+                    progress: 85,
+                    currentStage: 'Risk Assessment',
+                    timeline: [
+                        { time: '14:30', event: 'Alert triggered by CreateUser API call', status: 'complete' },
+                        { time: '14:31', event: 'AI Triage classified as HIGH priority', status: 'complete' },
+                        { time: '14:32', event: 'CloudTrail data collection completed', status: 'complete' },
+                        { time: '14:35', event: 'Pattern analysis identified privilege escalation', status: 'complete' },
+                        { time: '14:38', event: 'MITRE ATT&CK mapping: T1078, T1136, T1098', status: 'complete' },
+                        { time: '14:42', event: 'Risk assessment in progress...', status: 'active' },
+                        { time: 'Pending', event: 'Generate recommendations', status: 'pending' }
+                    ]
                 },
                 'INV-2024-002': {
                     title: 'Cross-Region API Reconnaissance',
                     status: 'Completed',
                     priority: 'MEDIUM',
                     findings: 'Automated scanning detected across multiple AWS regions',
-                    mitre: 'T1087, T1580'
+                    mitre: 'T1087, T1580',
+                    progress: 100,
+                    currentStage: 'Completed',
+                    timeline: [
+                        { time: '09:15', event: 'Cross-region API calls detected', status: 'complete' },
+                        { time: '09:16', event: 'AI Triage classified as MEDIUM priority', status: 'complete' },
+                        { time: '09:17', event: 'Multi-region data collection completed', status: 'complete' },
+                        { time: '09:20', event: 'Reconnaissance pattern identified', status: 'complete' },
+                        { time: '09:23', event: 'MITRE mapping: T1087, T1580', status: 'complete' },
+                        { time: '09:25', event: 'Risk assessment: Low impact', status: 'complete' },
+                        { time: '09:27', event: 'Recommendations generated', status: 'complete' }
+                    ]
                 },
                 'INV-2024-003': {
                     title: 'Malicious Security Group Creation',
                     status: 'Escalated',
                     priority: 'HIGH',
                     findings: 'Security group allowing unrestricted SSH access created',
-                    mitre: 'T1562'
+                    mitre: 'T1562',
+                    progress: 95,
+                    currentStage: 'Human Review Required',
+                    timeline: [
+                        { time: '16:45', event: 'Security group modification detected', status: 'complete' },
+                        { time: '16:46', event: 'AI Triage classified as HIGH priority', status: 'complete' },
+                        { time: '16:47', event: 'VPC and security group data collected', status: 'complete' },
+                        { time: '16:50', event: 'Malicious configuration identified', status: 'complete' },
+                        { time: '16:52', event: 'MITRE mapping: T1562', status: 'complete' },
+                        { time: '16:55', event: 'Critical risk assessment completed', status: 'complete' },
+                        { time: '16:58', event: 'Escalated to human analyst', status: 'escalated' }
+                    ]
                 }
             };
             
             const inv = investigations[invId];
             if (inv) {
-                showInvestigationResults(invId, inv.title, inv.priority, inv.findings);
+                showInvestigationDiagram(invId, inv);
             }
+        }
+        
+        function showInvestigationDiagram(invId, investigation) {
+            const mainContent = document.querySelector('.main-content');
+            
+            // Generate timeline HTML
+            let timelineHtml = '';
+            investigation.timeline.forEach((item, index) => {
+                const statusIcon = item.status === 'complete' ? '✅' : 
+                                 item.status === 'active' ? '⏳' : 
+                                 item.status === 'escalated' ? '🚨' : '⏸️';
+                const statusClass = item.status === 'complete' ? 'risk-low' : 
+                                  item.status === 'active' ? 'risk-warning' : 
+                                  item.status === 'escalated' ? 'risk-high' : 'risk-info';
+                
+                timelineHtml += `
+                    <div class="table-row">
+                        <div class="row-main">
+                            <div class="row-title">${statusIcon} ${item.time} - ${item.event}</div>
+                            <div class="row-subtitle">Step ${index + 1} of ${investigation.timeline.length}</div>
+                        </div>
+                        <div class="row-meta">
+                            <span class="risk-badge ${statusClass}">${item.status.toUpperCase()}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            mainContent.innerHTML = `
+                <div class="page-header">
+                    <h1 class="page-title">Investigation ${invId}</h1>
+                    <p class="page-subtitle">${investigation.title} - ${investigation.status}</p>
+                </div>
+                
+                <!-- Investigation Progress Diagram -->
+                <div class="data-table" style="margin-bottom: 24px;">
+                    <div class="table-header">
+                        <div class="table-title">🔍 Investigation Progress: ${investigation.progress}%</div>
+                        <div class="table-actions">
+                            <button class="btn btn-outline btn-sm" onclick="showInvestigationsView()">Back to Investigations</button>
+                        </div>
+                    </div>
+                    <div class="table-content" style="padding: 20px; background: #f8f9fa;">
+                        <!-- Progress Bar -->
+                        <div style="margin-bottom: 20px;">
+                            <div style="background: #e9ecef; height: 20px; border-radius: 10px; overflow: hidden;">
+                                <div style="background: linear-gradient(90deg, #28a745, #007bff); height: 100%; width: ${investigation.progress}%; transition: width 0.3s ease;"></div>
+                            </div>
+                            <div style="text-align: center; margin-top: 8px; font-weight: 600; color: #495057;">
+                                Current Stage: ${investigation.currentStage}
+                            </div>
+                        </div>
+                        
+                        <!-- Investigation Flow Diagram -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                            ${generateInvestigationSteps(investigation)}
+                        </div>
+                        
+                        <!-- Key Findings -->
+                        <div style="display: flex; justify-content: space-around; margin-top: 20px; padding-top: 20px; border-top: 1px solid #dee2e6;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 18px; font-weight: 600; color: #dc3545;">${investigation.priority}</div>
+                                <div style="font-size: 12px; color: #666;">Priority Level</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 18px; font-weight: 600; color: #007bff;">${investigation.mitre.split(', ').length}</div>
+                                <div style="font-size: 12px; color: #666;">MITRE Techniques</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 18px; font-weight: 600; color: #28a745;">${Math.floor((Date.now() - new Date().setHours(14, 30, 0, 0)) / 60000)}</div>
+                                <div style="font-size: 12px; color: #666;">Minutes Elapsed</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 18px; font-weight: 600; color: #ffc107;">AI</div>
+                                <div style="font-size: 12px; color: #666;">Investigation Type</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Investigation Timeline -->
+                <div class="data-table">
+                    <div class="table-header">
+                        <div class="table-title">⏱️ Investigation Timeline</div>
+                        <div class="table-actions">
+                            <button class="btn btn-outline btn-sm" onclick="exportInvestigationReport('${invId}')">📄 Export Report</button>
+                        </div>
+                    </div>
+                    <div class="table-content">
+                        ${timelineHtml}
+                    </div>
+                </div>
+                
+                <!-- Evidence and Findings -->
+                <div class="data-table" style="margin-top: 24px;">
+                    <div class="table-header">
+                        <div class="table-title">🔍 Evidence & Findings</div>
+                    </div>
+                    <div class="table-content">
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🎯 MITRE ATT&CK Techniques</div>
+                                <div class="row-subtitle">${investigation.mitre}</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-warning">MAPPED</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">📋 Key Findings</div>
+                                <div class="row-subtitle">${investigation.findings}</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-${investigation.priority.toLowerCase()}">CONFIRMED</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🛡️ Recommended Actions</div>
+                                <div class="row-subtitle">${getRecommendations(invId)}</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-info">ACTIONABLE</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function generateInvestigationSteps(investigation) {
+            const steps = [
+                { icon: '🚨', name: 'ALERT', color: '#007bff' },
+                { icon: '🤖', name: 'TRIAGE', color: '#28a745' },
+                { icon: '🔍', name: 'COLLECT', color: '#ffc107' },
+                { icon: '🧠', name: 'ANALYZE', color: '#17a2b8' },
+                { icon: '🎯', name: 'MITRE', color: '#6f42c1' },
+                { icon: '📊', name: 'ASSESS', color: '#dc3545' },
+                { icon: '🛡️', name: 'RECOMMEND', color: '#20c997' }
+            ];
+            
+            const currentStepIndex = Math.floor((investigation.progress / 100) * steps.length);
+            
+            return steps.map((step, index) => {
+                const isComplete = index < currentStepIndex;
+                const isCurrent = index === currentStepIndex;
+                const opacity = isComplete || isCurrent ? '1' : '0.3';
+                const borderColor = isComplete ? '#28a745' : isCurrent ? step.color : '#dee2e6';
+                
+                return `
+                    <div style="text-align: center; flex: 1; min-width: 80px; opacity: ${opacity};">
+                        <div style="width: 50px; height: 50px; border-radius: 50%; background: ${step.color}; color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; border: 3px solid ${borderColor}; font-size: 20px;">
+                            ${isComplete ? '✅' : step.icon}
+                        </div>
+                        <div style="font-weight: 600; font-size: 10px;">${step.name}</div>
+                    </div>
+                    ${index < steps.length - 1 ? '<div style="font-size: 16px; color: #007bff; margin: 0 5px;">→</div>' : ''}
+                `;
+            }).join('');
+        }
+        
+        function getRecommendations(invId) {
+            const recommendations = {
+                'INV-2024-001': 'Disable suspicious IAM users immediately, rotate access keys, implement MFA',
+                'INV-2024-002': 'Monitor for continued reconnaissance, implement API rate limiting, review access patterns',
+                'INV-2024-003': 'Block malicious security group, review network access controls, implement change approval process'
+            };
+            return recommendations[invId] || 'Standard security recommendations apply';
         }
         
         function exportInvestigationReport(invId) {
