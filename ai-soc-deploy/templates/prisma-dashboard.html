@@ -88,6 +88,30 @@
         </div>
 
         <div class="sidebar-section">
+            <div class="sidebar-title">Compliance</div>
+            <ul class="sidebar-menu">
+                <li class="sidebar-item">
+                    <a href="javascript:void(0)" class="sidebar-link">
+                        <span class="sidebar-icon">📜</span>
+                        Policy Management
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="javascript:void(0)" class="sidebar-link">
+                        <span class="sidebar-icon">🏛️</span>
+                        RBI Compliance
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a href="javascript:void(0)" class="sidebar-link">
+                        <span class="sidebar-icon">📈</span>
+                        SEBI Compliance
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="sidebar-section">
             <div class="sidebar-title">Management</div>
             <ul class="sidebar-menu">
                 <li class="sidebar-item">
@@ -706,6 +730,15 @@
                         case 'System Health':
                             showSystemHealthView();
                             break;
+                        case 'Policy Management':
+                            showPolicyManagementView();
+                            break;
+                        case 'RBI Compliance':
+                            showRBIComplianceView();
+                            break;
+                        case 'SEBI Compliance':
+                            showSEBIComplianceView();
+                            break;
                     }
                 });
             });
@@ -1016,6 +1049,207 @@
             
             // Trigger health check
             refreshSystemHealth();
+        }
+        
+        function showPolicyManagementView() {
+            document.querySelector('.page-title').textContent = 'Policy Management';
+            document.querySelector('.page-subtitle').textContent = 'RBI and SEBI policy configuration and compliance monitoring';
+            
+            const mainContent = document.querySelector('.main-content');
+            mainContent.innerHTML = `
+                <div class="page-header">
+                    <h1 class="page-title">Policy Management</h1>
+                    <p class="page-subtitle">RBI and SEBI policy configuration and compliance monitoring</p>
+                </div>
+                
+                <div class="data-table">
+                    <div class="table-header">
+                        <div class="table-title">📜 RBI Policy Configuration</div>
+                        <div class="table-actions">
+                            <button class="btn btn-sm" onclick="uploadPolicy('RBI')">Upload RBI Policy</button>
+                        </div>
+                    </div>
+                    <div class="table-content" id="rbi-policy-content">
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">RBI Cybersecurity Framework</div>
+                                <div class="row-subtitle">Sample: Data protection, incident reporting, and security controls for banking sector</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-low">ACTIVE</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="data-table" style="margin-top: 24px;">
+                    <div class="table-header">
+                        <div class="table-title">📈 SEBI Policy Configuration</div>
+                        <div class="table-actions">
+                            <button class="btn btn-sm" onclick="uploadPolicy('SEBI')">Upload SEBI Policy</button>
+                        </div>
+                    </div>
+                    <div class="table-content" id="sebi-policy-content">
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">SEBI IT Security Guidelines</div>
+                                <div class="row-subtitle">Sample: Market data protection, trading system security, and regulatory compliance</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-low">ACTIVE</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="data-table" style="margin-top: 24px;">
+                    <div class="table-header">
+                        <div class="table-title">🤖 Agentic Policy Agent Status</div>
+                        <div class="table-actions">
+                            <button class="btn btn-outline btn-sm" onclick="refreshPolicyAgent()">Refresh Status</button>
+                        </div>
+                    </div>
+                    <div class="table-content" id="policy-agent-content">
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">Policy Agent Active</div>
+                                <div class="row-subtitle">Monitoring all security alerts for RBI and SEBI compliance violations</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-info">AUTONOMOUS</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function showRBIComplianceView() {
+            document.querySelector('.page-title').textContent = 'RBI Compliance Monitor';
+            document.querySelector('.page-subtitle').textContent = 'Reserve Bank of India cybersecurity compliance tracking';
+            
+            fetch('/api/compliance/rbi')
+            .then(response => response.json())
+            .then(data => {
+                const mainContent = document.querySelector('.main-content');
+                mainContent.innerHTML = `
+                    <div class="page-header">
+                        <h1 class="page-title">RBI Compliance Monitor</h1>
+                        <p class="page-subtitle">Reserve Bank of India cybersecurity compliance tracking</p>
+                    </div>
+                    
+                    <div class="data-table">
+                        <div class="table-header">
+                            <div class="table-title">🏛️ RBI Compliance Violations</div>
+                            <div class="table-actions">
+                                <button class="btn btn-outline btn-sm" onclick="showRBIComplianceView()">Refresh</button>
+                            </div>
+                        </div>
+                        <div class="table-content" id="rbi-violations-content">
+                            ${displayComplianceViolations(data.violations || [], 'RBI')}
+                        </div>
+                    </div>
+                `;
+            })
+            .catch(error => {
+                console.error('Error loading RBI compliance:', error);
+                showRBIComplianceView(); // Fallback to static view
+            });
+        }
+        
+        function showSEBIComplianceView() {
+            document.querySelector('.page-title').textContent = 'SEBI Compliance Monitor';
+            document.querySelector('.page-subtitle').textContent = 'Securities and Exchange Board of India compliance tracking';
+            
+            fetch('/api/compliance/sebi')
+            .then(response => response.json())
+            .then(data => {
+                const mainContent = document.querySelector('.main-content');
+                mainContent.innerHTML = `
+                    <div class="page-header">
+                        <h1 class="page-title">SEBI Compliance Monitor</h1>
+                        <p class="page-subtitle">Securities and Exchange Board of India compliance tracking</p>
+                    </div>
+                    
+                    <div class="data-table">
+                        <div class="table-header">
+                            <div class="table-title">📈 SEBI Compliance Violations</div>
+                            <div class="table-actions">
+                                <button class="btn btn-outline btn-sm" onclick="showSEBIComplianceView()">Refresh</button>
+                            </div>
+                        </div>
+                        <div class="table-content" id="sebi-violations-content">
+                            ${displayComplianceViolations(data.violations || [], 'SEBI')}
+                        </div>
+                    </div>
+                `;
+            })
+            .catch(error => {
+                console.error('Error loading SEBI compliance:', error);
+                showSEBIComplianceView(); // Fallback to static view
+            });
+        }
+        
+        function displayComplianceViolations(violations, type) {
+            if (!violations || violations.length === 0) {
+                return `
+                    <div class="table-row">
+                        <div class="row-main">
+                            <div class="row-title">No ${type} compliance violations detected</div>
+                            <div class="row-subtitle">All security alerts are compliant with ${type} regulations</div>
+                        </div>
+                        <div class="row-meta">
+                            <span class="risk-badge risk-low">COMPLIANT</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            let html = '';
+            violations.forEach(violation => {
+                html += `
+                    <div class="table-row">
+                        <div class="row-main">
+                            <div class="row-title">⚠️ ${violation.policy_section}</div>
+                            <div class="row-subtitle">Alert: ${violation.alert_id} • Violation: ${violation.violation_type} • ${violation.timestamp}</div>
+                        </div>
+                        <div class="row-meta">
+                            <span class="risk-badge risk-${violation.severity.toLowerCase()}">${violation.severity}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            return html;
+        }
+        
+        function uploadPolicy(type) {
+            alert(`Upload ${type} Policy functionality - Integration with document management system`);
+        }
+        
+        function refreshPolicyAgent() {
+            fetch('/api/policy-agent/status')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('policy-agent-content');
+                if (data.status === 'success') {
+                    const agent = data.agent;
+                    container.innerHTML = `
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🤖 Agentic Policy Agent</div>
+                                <div class="row-subtitle">Processed: ${agent.alerts_analyzed} alerts • Violations Found: ${agent.violations_detected} • Accuracy: ${agent.accuracy}</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-info">AUTONOMOUS</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Error refreshing policy agent:', error);
+            });
         }
         
         // Event listeners

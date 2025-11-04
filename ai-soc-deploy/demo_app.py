@@ -11,6 +11,7 @@ from core_platform import CorePlatformService
 from aws_integration import create_aws_integrated_services
 from real_alert_processor import RealAlertProcessor
 from real_services import RealAuditService, RealMITREComponent
+from policy_agent import PolicyAgent
 
 def create_demo_app():
     """Create Flask application with AWS integration."""
@@ -34,6 +35,9 @@ def create_demo_app():
     
     # Core Platform Service
     core_platform = CorePlatformService(aws_clients['bedrock'], mitre_component, audit_service)
+    
+    # Policy Agent for compliance
+    policy_agent = PolicyAgent(aws_clients['bedrock'], aws_clients['rds'])
     
     # Real Alert Processor with database clients
     real_alerts = RealAlertProcessor(config_service, aws_clients['rds'], aws_clients['documentdb'])
@@ -578,6 +582,69 @@ def create_demo_app():
                 'status': 'error',
                 'error': str(e)
             }), 500
+    
+    @app.route('/api/policy-agent/status')
+    def get_policy_agent_status():
+        """Get policy agent status."""
+        try:
+            status = policy_agent.get_status()
+            return jsonify({
+                'status': 'success',
+                'agent': status
+            })
+        except Exception as e:
+            return jsonify({'status': 'error', 'error': str(e)}), 500
+    
+    @app.route('/api/compliance/rbi')
+    def get_rbi_compliance():
+        """Get RBI compliance violations."""
+        try:
+            violations = policy_agent.get_violations_by_type('RBI')
+            return jsonify({
+                'status': 'success',
+                'violations': violations,
+                'count': len(violations)
+            })
+        except Exception as e:
+            return jsonify({'status': 'error', 'error': str(e)}), 500
+    
+    @app.route('/api/compliance/sebi')
+    def get_sebi_compliance():
+        """Get SEBI compliance violations."""
+        try:
+            violations = policy_agent.get_violations_by_type('SEBI')
+            return jsonify({
+                'status': 'success',
+                'violations': violations,
+                'count': len(violations)
+            })
+        except Exception as e:
+            return jsonify({'status': 'error', 'error': str(e)}), 500
+    
+    @app.route('/api/alerts/analyze-compliance', methods=['POST'])
+    def analyze_alert_compliance():
+        """Analyze alert for compliance violations."""
+        try:
+            from flask import request
+            alert_data = request.get_json() or {}
+            
+            if not alert_data:
+                alert_data = {
+                    "alert_id": f"compliance_test_{int(time.time())}",
+                    "source": "Banking_System",
+                    "alert_type": "data_breach",
+                    "severity": "HIGH",
+                    "description": "Unauthorized access to customer data detected",
+                    "indicators": ["data_breach", "customer_data", "unauthorized_access"]
+                }
+            
+            compliance_result = policy_agent.analyze_alert_compliance(alert_data)
+            return jsonify({
+                'status': 'success',
+                'compliance_analysis': compliance_result
+            })
+        except Exception as e:
+            return jsonify({'status': 'error', 'error': str(e)}), 500
     
     return app
 
