@@ -14,9 +14,9 @@ class AlertStorage:
         self.init_storage()
     
     def init_storage(self):
-        """Initialize alert storage tables and collections."""
+        """Initialize all database tables for complete dashboard."""
         try:
-            # Create alerts table in RDS
+            # Security alerts table
             self.rds.execute_command("""
                 CREATE TABLE IF NOT EXISTS security_alerts (
                     id SERIAL PRIMARY KEY,
@@ -38,13 +38,67 @@ class AlertStorage:
                 )
             """)
             
-            # Create indexes for performance
+            # Dashboard metrics table
+            self.rds.execute_command("""
+                CREATE TABLE IF NOT EXISTS dashboard_metrics (
+                    id SERIAL PRIMARY KEY,
+                    metric_name VARCHAR(100) NOT NULL,
+                    metric_value INTEGER NOT NULL,
+                    metric_type VARCHAR(50) NOT NULL,
+                    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            
+            # Activity timeline table
+            self.rds.execute_command("""
+                CREATE TABLE IF NOT EXISTS activity_timeline (
+                    id SERIAL PRIMARY KEY,
+                    activity_type VARCHAR(100) NOT NULL,
+                    description TEXT NOT NULL,
+                    severity VARCHAR(50) NOT NULL,
+                    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    user_name VARCHAR(255),
+                    source VARCHAR(255)
+                )
+            """)
+            
+            # MITRE techniques table
+            self.rds.execute_command("""
+                CREATE TABLE IF NOT EXISTS mitre_techniques (
+                    id SERIAL PRIMARY KEY,
+                    technique_id VARCHAR(20) NOT NULL,
+                    technique_name VARCHAR(255) NOT NULL,
+                    tactic VARCHAR(100) NOT NULL,
+                    description TEXT,
+                    detection_count INTEGER DEFAULT 0,
+                    last_detected TIMESTAMP,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            
+            # System components table
+            self.rds.execute_command("""
+                CREATE TABLE IF NOT EXISTS system_components (
+                    id SERIAL PRIMARY KEY,
+                    component_name VARCHAR(100) NOT NULL,
+                    component_type VARCHAR(50) NOT NULL,
+                    status VARCHAR(50) NOT NULL,
+                    last_check TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    details TEXT
+                )
+            """)
+            
+            # Create indexes
             self.rds.execute_command("""
                 CREATE INDEX IF NOT EXISTS idx_alerts_timestamp ON security_alerts(timestamp);
                 CREATE INDEX IF NOT EXISTS idx_alerts_severity ON security_alerts(severity);
                 CREATE INDEX IF NOT EXISTS idx_alerts_status ON security_alerts(status);
-                CREATE INDEX IF NOT EXISTS idx_alerts_source ON security_alerts(source);
+                CREATE INDEX IF NOT EXISTS idx_activity_timestamp ON activity_timeline(timestamp);
+                CREATE INDEX IF NOT EXISTS idx_mitre_tactic ON mitre_techniques(tactic);
             """)
+            
+            # Initialize default data
+            self._populate_initial_data()
             
         except Exception as e:
             print(f"Storage initialization error: {e}")
@@ -77,17 +131,29 @@ class AlertStorage:
                 json.dumps(alert.get('recommendations', []))
             ))
             
-            # Save full raw data to DocumentDB for investigation
-            investigation_doc = {
-                'alert_id': alert_id,
-                'timestamp': alert.get('timestamp', datetime.now().isoformat()),
-                'raw_event': alert.get('raw_event', {}),
-                'processed_data': alert,
-                'investigation_status': 'pending',
-                'created_at': datetime.now().isoformat()
-            }
+            # Log activity
+            self.log_activity(
+                'alert_processed',
+                f"Security alert processed: {alert.get('description', 'Unknown alert')}",
+                alert.get('severity', 'MEDIUM'),
+                alert.get('user'),
+                alert.get('source')
+            )
             
-            self.documentdb.insert_document('security_investigations', investigation_doc)
+            # Save full raw data to DocumentDB for investigation (if available)
+            try:
+                if hasattr(self.documentdb, 'insert_document'):
+                    investigation_doc = {
+                        'alert_id': alert_id,
+                        'timestamp': alert.get('timestamp', datetime.now().isoformat()),
+                        'raw_event': alert.get('raw_event', {}),
+                        'processed_data': alert,
+                        'investigation_status': 'pending',
+                        'created_at': datetime.now().isoformat()
+                    }
+                    self.documentdb.insert_document('security_investigations', investigation_doc)
+            except Exception as e:
+                print(f"DocumentDB save failed (using PostgreSQL only): {e}")
             
             return alert_id
             
@@ -204,6 +270,146 @@ class AlertStorage:
                 'by_status': {},
                 'recent_24h': 0
             }
+    
+    def _populate_initial_data(self):
+        """Populate initial dashboard data."""
+        try:
+            # Initialize dashboard metrics
+            metrics = [
+                ('total_alerts', 0, 'counter'),
+                ('high_priority_alerts', 0, 'counter'),
+                ('resolved_incidents', 0, 'counter'),
+                ('active_threats', 0, 'counter')
+            ]
+            
+            for name, value, type_name in metrics:
+                self.rds.execute_command("""
+                    INSERT INTO dashboard_metrics (metric_name, metric_value, metric_type)
+                    VALUES (%s, %s, %s)
+                    ON CONFLICT DO NOTHING
+                """, (name, value, type_name))
+            
+            # Initialize MITRE techniques
+            techniques = [
+                ('T1078', 'Valid Accounts', 'Initial Access', 'Adversaries may obtain and abuse credentials'),
+                ('T1110', 'Brute Force', 'Credential Access', 'Adversaries may use brute force techniques'),
+                ('T1136', 'Create Account', 'Persistence', 'Adversaries may create an account to maintain access'),
+                ('T1098', 'Account Manipulation', 'Persistence', 'Adversaries may manipulate accounts to maintain access'),
+                ('T1087', 'Account Discovery', 'Discovery', 'Adversaries may attempt to get a listing of accounts')
+            ]
+            
+            for tech_id, name, tactic, desc in techniques:
+                self.rds.execute_command("""
+                    INSERT INTO mitre_techniques (technique_id, technique_name, tactic, description)
+                    VALUES (%s, %s, %s, %s)
+                    ON CONFLICT DO NOTHING
+                """, (tech_id, name, tactic, desc))
+            
+            # Initialize system components
+            components = [
+                ('AWS Bedrock', 'AI Service', 'healthy'),
+                ('PostgreSQL', 'Database', 'healthy'),
+                ('SQS Queue', 'Message Queue', 'healthy'),
+                ('Alert Processor', 'Service', 'healthy')
+            ]
+            
+            for name, comp_type, status in components:
+                self.rds.execute_command("""
+                    INSERT INTO system_components (component_name, component_type, status)
+                    VALUES (%s, %s, %s)
+                    ON CONFLICT DO NOTHING
+                """, (name, comp_type, status))
+                
+        except Exception as e:
+            print(f"Error populating initial data: {e}")
+    
+    def get_dashboard_metrics(self) -> Dict[str, Any]:
+        """Get dashboard metrics from database."""
+        try:
+            # Get current metrics
+            metrics_result = self.rds.execute_query("""
+                SELECT metric_name, metric_value FROM dashboard_metrics
+            """)
+            
+            metrics = {row[0]: row[1] for row in metrics_result} if metrics_result else {}
+            
+            # Update with real-time data
+            alert_stats = self.get_alert_statistics()
+            metrics.update({
+                'total_alerts': alert_stats.get('total_alerts', 0),
+                'high_priority_alerts': alert_stats.get('by_severity', {}).get('HIGH', 0),
+                'resolved_incidents': alert_stats.get('by_status', {}).get('RESOLVED', 0),
+                'active_threats': alert_stats.get('by_status', {}).get('OPEN', 0)
+            })
+            
+            return metrics
+            
+        except Exception as e:
+            print(f"Error getting dashboard metrics: {e}")
+            return {'total_alerts': 0, 'high_priority_alerts': 0, 'resolved_incidents': 0, 'active_threats': 0}
+    
+    def get_activity_timeline(self, limit: int = 10) -> List[Dict[str, Any]]:
+        """Get recent activity timeline from database."""
+        try:
+            result = self.rds.execute_query("""
+                SELECT activity_type, description, severity, timestamp, user_name, source
+                FROM activity_timeline
+                ORDER BY timestamp DESC
+                LIMIT %s
+            """, (limit,))
+            
+            activities = []
+            for row in result:
+                activities.append({
+                    'type': row[0],
+                    'description': row[1],
+                    'severity': row[2],
+                    'timestamp': row[3].isoformat() if hasattr(row[3], 'isoformat') else str(row[3]),
+                    'user': row[4],
+                    'source': row[5]
+                })
+            
+            return activities
+            
+        except Exception as e:
+            print(f"Error getting activity timeline: {e}")
+            return []
+    
+    def get_mitre_techniques(self) -> List[Dict[str, Any]]:
+        """Get MITRE techniques from database."""
+        try:
+            result = self.rds.execute_query("""
+                SELECT technique_id, technique_name, tactic, description, detection_count, last_detected
+                FROM mitre_techniques
+                ORDER BY detection_count DESC, technique_id
+            """)
+            
+            techniques = []
+            for row in result:
+                techniques.append({
+                    'id': row[0],
+                    'name': row[1],
+                    'tactic': row[2],
+                    'description': row[3],
+                    'detections': row[4] or 0,
+                    'last_detected': row[5].isoformat() if row[5] and hasattr(row[5], 'isoformat') else None
+                })
+            
+            return techniques
+            
+        except Exception as e:
+            print(f"Error getting MITRE techniques: {e}")
+            return []
+    
+    def log_activity(self, activity_type: str, description: str, severity: str = 'INFO', user_name: str = None, source: str = None):
+        """Log activity to timeline."""
+        try:
+            self.rds.execute_command("""
+                INSERT INTO activity_timeline (activity_type, description, severity, user_name, source)
+                VALUES (%s, %s, %s, %s, %s)
+            """, (activity_type, description, severity, user_name, source))
+        except Exception as e:
+            print(f"Error logging activity: {e}")
     
     def health_check(self) -> Dict[str, Any]:
         """Check storage health."""

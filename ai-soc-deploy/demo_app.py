@@ -310,6 +310,113 @@ def create_demo_app():
         except Exception as e:
             return jsonify({"status": "error", "error": str(e)}), 500
     
+    @app.route('/api/dashboard/metrics')
+    def get_dashboard_metrics():
+        """Get dashboard metrics from database."""
+        try:
+            if real_alerts.storage:
+                metrics = real_alerts.storage.get_dashboard_metrics()
+                return jsonify({
+                    'status': 'success',
+                    'metrics': metrics,
+                    'source': 'database'
+                })
+            else:
+                return jsonify({
+                    'status': 'success',
+                    'metrics': {'total_alerts': 0, 'high_priority_alerts': 0, 'resolved_incidents': 0, 'active_threats': 0},
+                    'source': 'fallback'
+                })
+        except Exception as e:
+            return jsonify({"status": "error", "error": str(e)}), 500
+    
+    @app.route('/api/dashboard/activity')
+    def get_activity_timeline():
+        """Get activity timeline from database."""
+        try:
+            if real_alerts.storage:
+                activities = real_alerts.storage.get_activity_timeline(limit=20)
+                return jsonify({
+                    'status': 'success',
+                    'activities': activities,
+                    'source': 'database'
+                })
+            else:
+                return jsonify({
+                    'status': 'success',
+                    'activities': [],
+                    'source': 'fallback'
+                })
+        except Exception as e:
+            return jsonify({"status": "error", "error": str(e)}), 500
+    
+    @app.route('/api/dashboard/mitre')
+    def get_mitre_dashboard():
+        """Get MITRE techniques from database."""
+        try:
+            if real_alerts.storage:
+                techniques = real_alerts.storage.get_mitre_techniques()
+                return jsonify({
+                    'status': 'success',
+                    'techniques': techniques,
+                    'source': 'database'
+                })
+            else:
+                return jsonify({
+                    'status': 'success',
+                    'techniques': [],
+                    'source': 'fallback'
+                })
+        except Exception as e:
+            return jsonify({"status": "error", "error": str(e)}), 500
+    
+    @app.route('/api/dashboard/charts')
+    def get_chart_data():
+        """Get chart data from database."""
+        try:
+            if real_alerts.storage:
+                # Get alert statistics for charts
+                stats = real_alerts.storage.get_alert_statistics()
+                
+                # Get recent alerts for timeline chart
+                recent_alerts = real_alerts.storage.get_alerts(limit=100)
+                
+                # Process data for charts
+                severity_data = stats.get('by_severity', {})
+                status_data = stats.get('by_status', {})
+                
+                # Timeline data (alerts per day for last 7 days)
+                from collections import defaultdict
+                timeline_data = defaultdict(int)
+                for alert in recent_alerts:
+                    if alert.get('timestamp'):
+                        date = alert['timestamp'][:10]  # Get date part
+                        timeline_data[date] += 1
+                
+                return jsonify({
+                    'status': 'success',
+                    'charts': {
+                        'severity_distribution': severity_data,
+                        'status_distribution': status_data,
+                        'timeline': dict(timeline_data),
+                        'total_alerts': stats.get('total_alerts', 0)
+                    },
+                    'source': 'database'
+                })
+            else:
+                return jsonify({
+                    'status': 'success',
+                    'charts': {
+                        'severity_distribution': {},
+                        'status_distribution': {},
+                        'timeline': {},
+                        'total_alerts': 0
+                    },
+                    'source': 'fallback'
+                })
+        except Exception as e:
+            return jsonify({"status": "error", "error": str(e)}), 500
+    
     return app
 
 if __name__ == '__main__':
