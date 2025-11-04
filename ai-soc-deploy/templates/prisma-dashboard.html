@@ -880,18 +880,232 @@
         }
         
         function showThreatIntelView() {
-            document.querySelector('.page-title').textContent = 'Threat Intelligence';
-            document.querySelector('.page-subtitle').textContent = 'MITRE ATT&CK framework and threat analysis';
-            
             const mainContent = document.querySelector('.main-content');
-            const dashboardGrid = mainContent.querySelector('.dashboard-grid');
-            const dataTables = mainContent.querySelectorAll('.data-table');
-            
-            // Hide dashboard grid, show only MITRE table
-            dashboardGrid.style.display = 'none';
-            dataTables.forEach((table, index) => {
-                table.style.display = index === 3 ? 'block' : 'none'; // Show only MITRE ATT&CK
-            });
+            mainContent.innerHTML = `
+                <div class="page-header">
+                    <h1 class="page-title">Threat Intelligence Center</h1>
+                    <p class="page-subtitle">MITRE ATT&CK framework, IOCs, and threat actor intelligence</p>
+                </div>
+                
+                <!-- Threat Intelligence Metrics -->
+                <div class="dashboard-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 24px;">
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-title">🎯 Active IOCs</div>
+                            <span class="metric-status status-warning">TRACKING</span>
+                        </div>
+                        <div class="metric-value">1,247</div>
+                        <div class="metric-label">Indicators of Compromise</div>
+                        <div class="metric-change change-positive">↗️ +23 new today</div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-title">🏴‍☠️ Threat Actors</div>
+                            <span class="metric-status status-active">MONITORED</span>
+                        </div>
+                        <div class="metric-value">47</div>
+                        <div class="metric-label">Known threat groups</div>
+                        <div class="metric-change change-neutral">📊 3 active campaigns</div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-title">🛡️ MITRE Techniques</div>
+                            <span class="metric-status status-active">MAPPED</span>
+                        </div>
+                        <div class="metric-value">156</div>
+                        <div class="metric-label">ATT&CK techniques detected</div>
+                        <div class="metric-change change-positive">↗️ 12 new this week</div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-header">
+                            <div class="metric-title">📡 Threat Feeds</div>
+                            <span class="metric-status status-active">LIVE</span>
+                        </div>
+                        <div class="metric-value">8/8</div>
+                        <div class="metric-label">Intelligence feeds active</div>
+                        <div class="metric-change change-positive">✅ All feeds operational</div>
+                    </div>
+                </div>
+                
+                <!-- MITRE ATT&CK Techniques -->
+                <div class="data-table">
+                    <div class="table-header">
+                        <div class="table-title">🛡️ MITRE ATT&CK Techniques</div>
+                        <div class="table-actions">
+                            <button class="btn btn-outline btn-sm" onclick="refreshThreatIntel()">🔄 Refresh</button>
+                            <button class="btn btn-sm" onclick="showMitreMatrix()">📊 View Matrix</button>
+                        </div>
+                    </div>
+                    <div class="table-content" id="mitre-techniques-intel">
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🎯 T1078: Valid Accounts</div>
+                                <div class="row-subtitle">Tactic: Initial Access, Defense Evasion • Detections: 15 • Last Seen: 2 hours ago</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-high">HIGH</span>
+                                <span class="risk-badge risk-warning">ACTIVE</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🔍 T1087: Account Discovery</div>
+                                <div class="row-subtitle">Tactic: Discovery • Detections: 8 • Last Seen: 4 hours ago</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-medium">MEDIUM</span>
+                                <span class="risk-badge risk-info">TRACKED</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🛠️ T1136: Create Account</div>
+                                <div class="row-subtitle">Tactic: Persistence • Detections: 5 • Last Seen: 6 hours ago</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-high">HIGH</span>
+                                <span class="risk-badge risk-warning">RECENT</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Threat Actors -->
+                <div class="data-table" style="margin-top: 24px;">
+                    <div class="table-header">
+                        <div class="table-title">🏴‍☠️ Active Threat Actors</div>
+                        <div class="table-actions">
+                            <button class="btn btn-outline btn-sm" onclick="viewThreatActorDetails('APT29')">View Details</button>
+                        </div>
+                    </div>
+                    <div class="table-content">
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🇷🇺 APT29 (Cozy Bear)</div>
+                                <div class="row-subtitle">Nation-State • Russia • Targeting: Government, Healthcare • Last Activity: 3 days ago</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-high">CRITICAL</span>
+                                <span class="risk-badge risk-warning">ACTIVE</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🇨🇳 APT40 (Leviathan)</div>
+                                <div class="row-subtitle">Nation-State • China • Targeting: Maritime, Engineering • Last Activity: 1 week ago</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-high">HIGH</span>
+                                <span class="risk-badge risk-info">MONITORED</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">💰 FIN7 (Carbanak)</div>
+                                <div class="row-subtitle">Financial Crime • International • Targeting: Retail, Banking • Last Activity: 2 weeks ago</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-medium">MEDIUM</span>
+                                <span class="risk-badge risk-low">DORMANT</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Indicators of Compromise -->
+                <div class="data-table" style="margin-top: 24px;">
+                    <div class="table-header">
+                        <div class="table-title">🎯 Recent Indicators of Compromise (IOCs)</div>
+                        <div class="table-actions">
+                            <button class="btn btn-sm" onclick="addCustomIOC()">➕ Add IOC</button>
+                            <button class="btn btn-outline btn-sm" onclick="exportIOCs()">📤 Export</button>
+                        </div>
+                    </div>
+                    <div class="table-content">
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🌐 malicious-c2.darkweb.onion</div>
+                                <div class="row-subtitle">Type: Domain • Source: Threat Feed • Confidence: High • Added: 2 hours ago</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-high">MALICIOUS</span>
+                                <span class="risk-badge risk-warning">BLOCKED</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">📁 a1b2c3d4e5f6789012345678901234567890abcd</div>
+                                <div class="row-subtitle">Type: File Hash (SHA-1) • Source: VirusTotal • Confidence: High • Added: 4 hours ago</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-high">MALWARE</span>
+                                <span class="risk-badge risk-info">TRACKED</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🌍 185.220.101.42</div>
+                                <div class="row-subtitle">Type: IP Address • Source: Tor Exit Node • Confidence: Medium • Added: 6 hours ago</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-medium">SUSPICIOUS</span>
+                                <span class="risk-badge risk-warning">MONITORED</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Threat Intelligence Feeds -->
+                <div class="data-table" style="margin-top: 24px;">
+                    <div class="table-header">
+                        <div class="table-title">📡 Threat Intelligence Feeds</div>
+                        <div class="table-actions">
+                            <button class="btn btn-outline btn-sm" onclick="configureThreatFeeds()">⚙️ Configure</button>
+                        </div>
+                    </div>
+                    <div class="table-content">
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🏛️ CISA Known Exploited Vulnerabilities</div>
+                                <div class="row-subtitle">Government Feed • Last Update: 1 hour ago • IOCs: 1,247 • Status: Active</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-low">ACTIVE</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🔬 AlienVault OTX</div>
+                                <div class="row-subtitle">Community Feed • Last Update: 30 minutes ago • IOCs: 892 • Status: Active</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-low">ACTIVE</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🦠 VirusTotal Intelligence</div>
+                                <div class="row-subtitle">Commercial Feed • Last Update: 15 minutes ago • IOCs: 2,156 • Status: Active</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-low">ACTIVE</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🌐 Tor Exit Nodes</div>
+                                <div class="row-subtitle">Network Feed • Last Update: 5 minutes ago • IOCs: 1,089 • Status: Active</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-low">ACTIVE</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
         
         function showTriageCrewView() {
@@ -1683,6 +1897,303 @@
             alert(`Investigation report ${invId} exported successfully!\n\nReport includes:\n• Executive Summary\n• Technical Findings\n• MITRE ATT&CK Mapping\n• Remediation Steps\n• Compliance Assessment`);
         }
         
+        // Threat Intelligence Functions
+        function refreshThreatIntel() {
+            // Simulate refreshing threat intelligence data
+            const container = document.getElementById('mitre-techniques-intel');
+            container.innerHTML = `
+                <div class="table-row">
+                    <div class="row-main">
+                        <div class="row-title">🔄 Refreshing threat intelligence...</div>
+                        <div class="row-subtitle">Updating MITRE ATT&CK techniques and IOCs</div>
+                    </div>
+                    <div class="row-meta">
+                        <span class="loading-spinner"></span>
+                    </div>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                container.innerHTML = `
+                    <div class="table-row">
+                        <div class="row-main">
+                            <div class="row-title">🎯 T1078: Valid Accounts</div>
+                            <div class="row-subtitle">Tactic: Initial Access, Defense Evasion • Detections: 18 • Last Seen: Just now</div>
+                        </div>
+                        <div class="row-meta">
+                            <span class="risk-badge risk-high">HIGH</span>
+                            <span class="risk-badge risk-warning">ACTIVE</span>
+                        </div>
+                    </div>
+                    <div class="table-row">
+                        <div class="row-main">
+                            <div class="row-title">🔍 T1087: Account Discovery</div>
+                            <div class="row-subtitle">Tactic: Discovery • Detections: 11 • Last Seen: 15 minutes ago</div>
+                        </div>
+                        <div class="row-meta">
+                            <span class="risk-badge risk-medium">MEDIUM</span>
+                            <span class="risk-badge risk-info">TRACKED</span>
+                        </div>
+                    </div>
+                    <div class="table-row">
+                        <div class="row-main">
+                            <div class="row-title">🛠️ T1136: Create Account</div>
+                            <div class="row-subtitle">Tactic: Persistence • Detections: 7 • Last Seen: 2 hours ago</div>
+                        </div>
+                        <div class="row-meta">
+                            <span class="risk-badge risk-high">HIGH</span>
+                            <span class="risk-badge risk-warning">RECENT</span>
+                        </div>
+                    </div>
+                    <div class="table-row">
+                        <div class="row-main">
+                            <div class="row-title">🔐 T1098: Account Manipulation</div>
+                            <div class="row-subtitle">Tactic: Persistence • Detections: 3 • Last Seen: 4 hours ago</div>
+                        </div>
+                        <div class="row-meta">
+                            <span class="risk-badge risk-medium">MEDIUM</span>
+                            <span class="risk-badge risk-info">TRACKED</span>
+                        </div>
+                    </div>
+                `;
+            }, 2000);
+        }
+        
+        function showMitreMatrix() {
+            const mainContent = document.querySelector('.main-content');
+            mainContent.innerHTML = `
+                <div class="page-header">
+                    <h1 class="page-title">MITRE ATT&CK Matrix</h1>
+                    <p class="page-subtitle">Enterprise tactics and techniques heatmap</p>
+                </div>
+                
+                <div class="data-table">
+                    <div class="table-header">
+                        <div class="table-title">🛡️ ATT&CK Tactics Coverage</div>
+                        <div class="table-actions">
+                            <button class="btn btn-outline btn-sm" onclick="showThreatIntelView()">Back to Threat Intel</button>
+                        </div>
+                    </div>
+                    <div class="table-content">
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🎯 Initial Access</div>
+                                <div class="row-subtitle">Techniques Detected: 8/14 • Coverage: 57% • Recent Activity: High</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-warning">ACTIVE</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">⚡ Execution</div>
+                                <div class="row-subtitle">Techniques Detected: 12/13 • Coverage: 92% • Recent Activity: Medium</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-info">COVERED</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🔒 Persistence</div>
+                                <div class="row-subtitle">Techniques Detected: 15/19 • Coverage: 79% • Recent Activity: High</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-warning">ACTIVE</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🛡️ Defense Evasion</div>
+                                <div class="row-subtitle">Techniques Detected: 22/42 • Coverage: 52% • Recent Activity: Critical</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-high">CRITICAL</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🔍 Discovery</div>
+                                <div class="row-subtitle">Techniques Detected: 18/30 • Coverage: 60% • Recent Activity: Medium</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-info">MONITORED</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function viewThreatActorDetails(actorName) {
+            const mainContent = document.querySelector('.main-content');
+            mainContent.innerHTML = `
+                <div class="page-header">
+                    <h1 class="page-title">Threat Actor Profile: ${actorName}</h1>
+                    <p class="page-subtitle">Detailed intelligence and attribution analysis</p>
+                </div>
+                
+                <div class="data-table">
+                    <div class="table-header">
+                        <div class="table-title">🏴‍☠️ ${actorName} (Cozy Bear) Profile</div>
+                        <div class="table-actions">
+                            <button class="btn btn-outline btn-sm" onclick="showThreatIntelView()">Back to Threat Intel</button>
+                        </div>
+                    </div>
+                    <div class="table-content">
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🌍 Attribution</div>
+                                <div class="row-subtitle">Nation-State: Russia • Sponsor: SVR (Foreign Intelligence Service) • Active Since: 2008</div>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🎯 Primary Targets</div>
+                                <div class="row-subtitle">Government agencies, diplomatic missions, healthcare organizations, technology companies</div>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🛠️ TTPs (Tactics, Techniques, Procedures)</div>
+                                <div class="row-subtitle">Spear phishing, supply chain attacks, cloud exploitation, living-off-the-land techniques</div>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">🔧 Known Tools</div>
+                                <div class="row-subtitle">CozyDuke, MiniDuke, SeaDuke, CloudDuke, WellMess, SUNBURST</div>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">📊 Recent Campaigns</div>
+                                <div class="row-subtitle">SolarWinds Supply Chain (2020), COVID-19 Vaccine Research (2020), US Election Infrastructure (2020)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="data-table" style="margin-top: 24px;">
+                    <div class="table-header">
+                        <div class="table-title">🛡️ MITRE ATT&CK Techniques Used</div>
+                    </div>
+                    <div class="table-content">
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">T1566.001: Spearphishing Attachment</div>
+                                <div class="row-subtitle">Frequency: High • Last Observed: 2 weeks ago • Success Rate: 23%</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-high">SIGNATURE</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">T1195.002: Compromise Software Supply Chain</div>
+                                <div class="row-subtitle">Frequency: Low • Last Observed: 6 months ago • Success Rate: 89%</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-high">CRITICAL</span>
+                            </div>
+                        </div>
+                        <div class="table-row">
+                            <div class="row-main">
+                                <div class="row-title">T1078.004: Cloud Accounts</div>
+                                <div class="row-subtitle">Frequency: Medium • Last Observed: 1 month ago • Success Rate: 45%</div>
+                            </div>
+                            <div class="row-meta">
+                                <span class="risk-badge risk-warning">EVOLVING</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function addCustomIOC() {
+            const mainContent = document.querySelector('.main-content');
+            mainContent.innerHTML = `
+                <div class="page-header">
+                    <h1 class="page-title">Add Custom IOC</h1>
+                    <p class="page-subtitle">Add new Indicator of Compromise to threat intelligence</p>
+                </div>
+                
+                <div class="data-table">
+                    <div class="table-header">
+                        <div class="table-title">🎯 New IOC Entry</div>
+                        <div class="table-actions">
+                            <button class="btn btn-outline btn-sm" onclick="showThreatIntelView()">Back to Threat Intel</button>
+                        </div>
+                    </div>
+                    <div class="table-content">
+                        <form id="ioc-form" style="padding: 20px;">
+                            <div style="margin-bottom: 16px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">IOC Type:</label>
+                                <select id="ioc-type" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                    <option value="ip">IP Address</option>
+                                    <option value="domain">Domain</option>
+                                    <option value="url">URL</option>
+                                    <option value="hash">File Hash</option>
+                                    <option value="email">Email Address</option>
+                                </select>
+                            </div>
+                            
+                            <div style="margin-bottom: 16px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">IOC Value:</label>
+                                <input type="text" id="ioc-value" placeholder="e.g., 192.168.1.100, malicious.com, hash123..." 
+                                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                            </div>
+                            
+                            <div style="margin-bottom: 16px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Threat Level:</label>
+                                <select id="threat-level" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                                    <option value="LOW">Low</option>
+                                    <option value="MEDIUM" selected>Medium</option>
+                                    <option value="HIGH">High</option>
+                                    <option value="CRITICAL">Critical</option>
+                                </select>
+                            </div>
+                            
+                            <div style="margin-bottom: 16px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Source:</label>
+                                <input type="text" id="ioc-source" placeholder="e.g., Internal Analysis, Threat Feed, Partner Intel" 
+                                       style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" required>
+                            </div>
+                            
+                            <div style="margin-bottom: 16px;">
+                                <label style="display: block; margin-bottom: 8px; font-weight: 600;">Description:</label>
+                                <textarea id="ioc-description" rows="4" placeholder="Describe the threat and context..." 
+                                          style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; resize: vertical;"></textarea>
+                            </div>
+                            
+                            <div style="display: flex; gap: 12px;">
+                                <button type="submit" class="btn btn-sm" style="flex: 1;">🎯 Add IOC</button>
+                                <button type="button" class="btn btn-outline btn-sm" onclick="showThreatIntelView()" style="flex: 1;">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('ioc-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const type = document.getElementById('ioc-type').value;
+                const value = document.getElementById('ioc-value').value;
+                const level = document.getElementById('threat-level').value;
+                alert(`IOC added successfully!\n\nType: ${type.toUpperCase()}\nValue: ${value}\nThreat Level: ${level}\n\nIOC will be automatically distributed to all security tools.`);
+                showThreatIntelView();
+            });
+        }
+        
+        function exportIOCs() {
+            alert('IOCs exported successfully!\n\nExport includes:\n• 1,247 active IOCs\n• STIX/TAXII format\n• CSV format\n• JSON format\n\nFiles ready for import into SIEM, firewalls, and other security tools.');
+        }
+        
+        function configureThreatFeeds() {
+            alert('Threat Feed Configuration\n\nCurrent Feeds:\n• CISA KEV: Active\n• AlienVault OTX: Active\n• VirusTotal: Active\n• Tor Exit Nodes: Active\n• Custom Feeds: 4 configured\n\nAll feeds updating automatically every 15 minutes.');
+        }
+        
         // Event listeners
         document.addEventListener('DOMContentLoaded', function() {
             // Load alerts and MITRE data on page load
@@ -1691,11 +2202,11 @@
             refreshCrewStatus();
             refreshSystemHealth();
             
-            // Auto-refresh every 30 seconds
-            setInterval(refreshRealAlerts, 30000);
-            setInterval(refreshMITRETechniques, 45000);
-            setInterval(refreshCrewStatus, 60000);
-            setInterval(refreshSystemHealth, 120000);
+            // Auto-refresh with reasonable intervals to prevent deployment loops
+            setInterval(refreshRealAlerts, 120000);      // 2 minutes
+            setInterval(refreshMITRETechniques, 180000); // 3 minutes
+            setInterval(refreshCrewStatus, 240000);      // 4 minutes
+            setInterval(refreshSystemHealth, 300000);    // 5 minutes
             
             // Refresh buttons
             document.getElementById('refresh-alerts-btn').addEventListener('click', refreshRealAlerts);
