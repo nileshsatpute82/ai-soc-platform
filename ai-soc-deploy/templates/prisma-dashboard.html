@@ -58,7 +58,7 @@
         </div>
 
         <div class="sidebar-section">
-            <div class="sidebar-title">AI Crews</div>
+            <div class="sidebar-title">Agentic AI Crews</div>
             <ul class="sidebar-menu">
                 <li class="sidebar-item">
                     <a href="#" class="sidebar-link">
@@ -499,14 +499,15 @@
             // Display triage crew
             if (crews.triage_crew) {
                 const crew = crews.triage_crew;
+                const recentDecision = crew.recent_decisions ? crew.recent_decisions[0] : 'Monitoring threat landscape';
                 html += `
                     <div class="table-row">
                         <div class="row-main">
-                            <div class="row-title">🤖 Triage Crew</div>
-                            <div class="row-subtitle">Processed: ${crew.alerts_processed} alerts • Avg Time: ${crew.avg_processing_time} • Accuracy: ${crew.accuracy}</div>
+                            <div class="row-title">🤖 Agentic Triage Crew</div>
+                            <div class="row-subtitle">Processed: ${crew.alerts_processed} alerts • Accuracy: ${crew.accuracy} • Latest Decision: ${recentDecision}</div>
                         </div>
                         <div class="row-meta">
-                            <span class="risk-badge risk-low">${crew.status.toUpperCase()}</span>
+                            <span class="risk-badge risk-info">AUTONOMOUS</span>
                         </div>
                     </div>
                 `;
@@ -515,14 +516,15 @@
             // Display investigation crew
             if (crews.investigation_crew) {
                 const crew = crews.investigation_crew;
+                const recentDecision = crew.recent_decisions ? crew.recent_decisions[0] : 'Analyzing threat patterns';
                 html += `
                     <div class="table-row">
                         <div class="row-main">
-                            <div class="row-title">🔍 Investigation Crew</div>
-                            <div class="row-subtitle">Completed: ${crew.investigations_completed} investigations • Avg Time: ${crew.avg_investigation_time} • Success: ${crew.success_rate}</div>
+                            <div class="row-title">🔍 Agentic Investigation Crew</div>
+                            <div class="row-subtitle">Investigations: ${crew.investigations_completed} • Success: ${crew.success_rate} • Latest: ${recentDecision}</div>
                         </div>
                         <div class="row-meta">
-                            <span class="risk-badge risk-low">${crew.status.toUpperCase()}</span>
+                            <span class="risk-badge risk-info">AUTONOMOUS</span>
                         </div>
                     </div>
                 `;
@@ -531,14 +533,15 @@
             // Display network security crew
             if (crews.network_security_crew) {
                 const crew = crews.network_security_crew;
+                const recentDecision = crew.recent_decisions ? crew.recent_decisions[0] : 'Monitoring network patterns';
                 html += `
                     <div class="table-row">
                         <div class="row-main">
-                            <div class="row-title">🌐 Network Security Crew</div>
-                            <div class="row-subtitle">Events: ${crew.network_events_analyzed} • Threats Blocked: ${crew.threats_blocked} • False Positive: ${crew.false_positive_rate}</div>
+                            <div class="row-title">🌐 Agentic Network Security</div>
+                            <div class="row-subtitle">Threats Blocked: ${crew.threats_blocked} • FP Rate: ${crew.false_positive_rate} • Latest: ${recentDecision}</div>
                         </div>
                         <div class="row-meta">
-                            <span class="risk-badge risk-low">${crew.status.toUpperCase()}</span>
+                            <span class="risk-badge risk-info">AUTONOMOUS</span>
                         </div>
                     </div>
                 `;
@@ -547,14 +550,15 @@
             // Display endpoint security crew
             if (crews.endpoint_security_crew) {
                 const crew = crews.endpoint_security_crew;
+                const recentDecision = crew.recent_decisions ? crew.recent_decisions[0] : 'Learning endpoint behaviors';
                 html += `
                     <div class="table-row">
                         <div class="row-main">
-                            <div class="row-title">💻 Endpoint Security Crew</div>
-                            <div class="row-subtitle">Endpoints: ${crew.endpoints_monitored} • Malware Detected: ${crew.malware_detected} • Quarantine Success: ${crew.quarantine_success}</div>
+                            <div class="row-title">💻 Agentic Endpoint Security</div>
+                            <div class="row-subtitle">Endpoints: ${crew.endpoints_monitored} • Quarantine: ${crew.quarantine_success} • Latest: ${recentDecision}</div>
                         </div>
                         <div class="row-meta">
-                            <span class="risk-badge risk-low">${crew.status.toUpperCase()}</span>
+                            <span class="risk-badge risk-info">AUTONOMOUS</span>
                         </div>
                     </div>
                 `;
