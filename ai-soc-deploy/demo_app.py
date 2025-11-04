@@ -714,6 +714,23 @@ def create_demo_app():
                 MessageAttributeNames=['All']
             )
             
+            # Debug message content
+            debug_messages = []
+            for msg in messages.get('Messages', []):
+                try:
+                    body = json.loads(msg['Body'])
+                    debug_messages.append({
+                        'message_id': msg.get('MessageId'),
+                        'body_keys': list(body.keys()) if isinstance(body, dict) else 'not_dict',
+                        'body_preview': str(body)[:200] + '...' if len(str(body)) > 200 else str(body)
+                    })
+                except Exception as e:
+                    debug_messages.append({
+                        'message_id': msg.get('MessageId'),
+                        'parse_error': str(e),
+                        'raw_body': msg['Body'][:200] + '...' if len(msg['Body']) > 200 else msg['Body']
+                    })
+            
             # Process new alerts to force database update
             new_alerts = real_alerts.poll_alerts(max_messages=5)
             
@@ -724,6 +741,7 @@ def create_demo_app():
                 'messages_available': len(messages.get('Messages', [])),
                 'new_alerts_processed': len(new_alerts),
                 'recent_alerts': new_alerts[:3] if new_alerts else [],
+                'debug_messages': debug_messages,
                 'timestamp': time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
             })
             

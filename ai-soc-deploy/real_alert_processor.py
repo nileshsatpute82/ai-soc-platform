@@ -41,15 +41,38 @@ class RealAlertProcessor:
                     # Parse message body
                     body = json.loads(message['Body'])
                     
-                    # Handle SNS wrapped messages
+                    # Handle different message formats
+                    alert_data = None
+                    
+                    # SNS wrapped messages
                     if 'Message' in body:
-                        alert_data = json.loads(body['Message'])
+                        try:
+                            alert_data = json.loads(body['Message'])
+                        except:
+                            alert_data = body  # Use outer body if Message parsing fails
+                    
+                    # EventBridge direct messages
+                    elif 'detail' in body and 'source' in body:
+                        alert_data = body
+                    
+                    # CloudTrail log events
+                    elif 'Records' in body:
+                        # Handle CloudTrail log format
+                        for record in body['Records']:
+                            if 'eventSource' in record:
+                                alert_data = {'detail': record, 'source': 'aws.cloudtrail'}
+                                break
+                    
+                    # Fallback to using body directly
                     else:
                         alert_data = body
                     
-                    # Convert to standard alert format
-                    alert = self.convert_to_standard_alert(alert_data, message)
-                    alerts.append(alert)
+                    if alert_data:
+                        # Convert to standard alert format
+                        alert = self.convert_to_standard_alert(alert_data, message)
+                        alerts.append(alert)
+                    else:
+                        print(f"Could not extract alert data from message: {body}")
                     
                     # Save alert to persistent storage
                     if self.storage:
@@ -65,6 +88,7 @@ class RealAlertProcessor:
                     
                 except Exception as e:
                     print(f"Error processing message: {e}")
+                    print(f"Message body: {message.get('Body', 'No body')}")
                     continue
             
             return alerts
